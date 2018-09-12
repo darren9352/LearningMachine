@@ -1,0 +1,6 @@
+Django
+Pillow
+gunicorn
+tensorflow
+WhiteNoise
+cleverhans
