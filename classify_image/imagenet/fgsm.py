@@ -43,8 +43,11 @@ def show_predictions(d, x, n=10):
     print(decode_predictions(preds, top=n)[0])
 
 def get_predictions(d, x, n=10) :
-    preds = d.predict(x)
-    return decode_predictions(preds, top=10)[0]
+	preds = d.predict(x)
+	res = decode_predictions(preds, top=10)
+	print(res[0])
+	#return decode_predictions(preds, top=10)[0]
+	return res[0]
 
 def cw_attack_keras(model, x_input, input_img, sess):
     wrap = KerasModelWrapper(model)
