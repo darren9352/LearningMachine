@@ -77,7 +77,6 @@ def classify_api(request):
         with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
             img_str = base64.b64encode(img_file.read())
         tmp_adver.write(base64.b64decode(img_str))
-        #adver_result = tf_classify(tmp_adver, int(request.POST.get('k', MAX_K)))
         tmp_adver.close()
 
         data["success"] = True

@@ -55,7 +55,6 @@ def attack(model, x_input, input_img, sess):
     adv_image = sess.run(x_adv, feed_dict={x_input: input_img})
 
     for i in range(3):
-        print('iter:', i)
         if i == 0:
             adv_image = sess.run(x_adv, feed_dict={x_input: input_img})
         else:
@@ -85,7 +84,6 @@ def fgsm_attack(d, x_input, x, sess) :
     """
     current_dir = os.path.dirname(__file__)
 
-    #print('attack start!')
     res = attack(d, x_input, x, sess)
 
 
@@ -101,6 +99,5 @@ def fgsm_attack(d, x_input, x, sess) :
     sv_img = Image.fromarray(d_img)
     path = os.path.join(current_dir, 'output/testtest.png')
     sv_img.save(path)
-    print('save success the adver image.')
 
     return decode_predictions(preds, top=10)[0]
