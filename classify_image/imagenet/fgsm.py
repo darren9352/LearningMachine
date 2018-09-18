@@ -12,7 +12,7 @@ from keras import backend
 import tensorflow as tf
 
 from cleverhans.utils_keras import KerasModelWrapper
-from cleverhans.attacks import FastGradientMethod
+from cleverhans.attacks import *
 
 IMAGE_SIZE=299
 TARGET_CLASS=849 # teapot
@@ -45,6 +45,26 @@ def show_predictions(d, x, n=10):
 def get_predictions(d, x, n=10) :
     preds = d.predict(x)
     return decode_predictions(preds, top=10)[0]
+
+def cw_attack_keras(model, x_input, input_img, sess):
+    wrap = KerasModelWrapper(model)
+    
+    cw_params = {'binary_search_steps': 1,
+                    'max_iterations': 5,
+                    'learning_rate': 2e-3,
+                    'batch_size': 1,
+                    'initial_const': 0.1,
+                    'confidence' : 0,
+                    'clip_min': -1.,
+                    'clip_max': 1.}
+
+    cw = CarliniWagnerL2(wrap, sess=sess)
+    adv = cw.generate(x=x_input, initial_const=2.0 * 16 / 255.0, batch_size = 1,
+		 binary_search_steps= 4, learning_rate=2e-3, clip_min=-1., clip_max=1.,
+		 max_iterations=5)
+    adv_img = sess.run(adv, feed_dict={x_input: input_img})
+    return adv_img
+
 
 def attack(model, x_input, input_img, sess):
     wrap = KerasModelWrapper(model)
@@ -86,7 +106,6 @@ def fgsm_attack(d, x_input, x, sess) :
 
     res = attack(d, x_input, x, sess)
 
-
 	# show the results.
     print("************************************************")
     print("Results:")
@@ -97,6 +116,21 @@ def fgsm_attack(d, x_input, x, sess) :
 
     d_img = deprocess(res[0]).astype(np.uint8)
     sv_img = Image.fromarray(d_img)
+    path = os.path.join(current_dir, 'output/testtest.png')
+    sv_img.save(path)
+
+    return decode_predictions(preds, top=10)[0]
+
+def cw_attack(d, x_input, x, sess) :
+
+    res = cw_attack_keras(d, x_input, x, sess)
+
+    preds = d.predict(res)
+    #print(decode_predictions(preds, top=3)[0])
+
+    d_img = deprocess(res[0]).astype(np.uint8)
+    sv_img = Image.fromarray(d_img)
+    current_dir = os.path.dirname(__file__)
     path = os.path.join(current_dir, 'output/testtest.png')
     sv_img.save(path)
 

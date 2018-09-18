@@ -20,9 +20,7 @@ from keras.applications.inception_v3 import InceptionV3, decode_predictions
 from keras.layers.core import K
 from keras import backend
 
-MAX_K = 10
-
-#SESS, GRAPH_TENSOR, LABELS = load_graph()
+tf.logging.set_verbosity(tf.logging.ERROR)
 
 def clean_directory() :
     my_input_file = Path(os.path.join(current_dir, 'imagenet/dataset/images/testtest.png'))
@@ -53,7 +51,6 @@ def classify_api(request):
             image.save(os.path.join(current_dir, 'imagenet/dataset/images/testtest.png'))
             tmp_f.write(plain_data)
 
-        #classify_result = tf_classify(tmp_f, int(request.POST.get('k', MAX_K)))
         tmp_f.close()
 
         # Backend session for attack
@@ -72,7 +69,7 @@ def classify_api(request):
         classify_result = get_predictions(d, x, 10)
 
         print('attack start.')
-        result = fgsm_attack(d, x_input, x, sess)
+        result = cw_attack(d, x_input, x, sess)
 
         with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
             img_str = base64.b64encode(img_file.read())
