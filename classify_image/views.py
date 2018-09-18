@@ -22,14 +22,6 @@ from keras import backend
 
 MAX_K = 10
 
-TF_GRAPH = "{base_path}/inception_model/graph.pb".format(
-    base_path=os.path.abspath(os.path.dirname(__file__)))
-TF_LABELS = "{base_path}/inception_model/labels.txt".format(
-    base_path=os.path.abspath(os.path.dirname(__file__)))
-
-
-print('Hello World!!!')
-
 #SESS, GRAPH_TENSOR, LABELS = load_graph()
 
 def clean_directory() :
@@ -39,8 +31,6 @@ def clean_directory() :
         os.remove(os.path.join(current_dir, 'imagenet/dataset/images/testtest.png'))
     if my_output_file.is_file():
         os.remove(os.path.join(current_dir, 'imagenet/output/testtest.png'))
-
-
 
 @csrf_exempt
 def classify_api(request):
