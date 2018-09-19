@@ -98,10 +98,15 @@ def classify_api(request):
 		data["adversarial"] = {}
 		for i in range(len(result)) :
 			data["adversarial"][result[i][1]] = float(result[i][2])   
+			#print('iter:', i, 'name:', result[i][1], 'pred:', result[i][2])
 
 		# Close the session
 		sess.close()
-                 
+
+		# Sort data by value
+		sorted(data["confidence"].items(), key=lambda x: x[1])
+		sorted(data["adversarial"].items(), key=lambda x: x[1])
+
 	return JsonResponse(data)
 
 def classify(request):

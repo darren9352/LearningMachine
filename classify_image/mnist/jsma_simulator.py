@@ -51,14 +51,17 @@ def simulate_jsma():
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init_op)
-        save_path = r'C:\Users\hhkim\Desktop\scc\cleverhans\cleverhans_tutorials\model_data\train_model'
-        saver.restore(sess, save_path)
+        saver = tf.train.import_meta_graph('./model/mnist_model.ckpt.meta')
+        current_dir = os.getcwd()
+        path = os.path.join(current_dir, 'model/mnist_model.ckpt')
+        saver.restore(sess, path)
 
         sample_class = int(input('input sample class(0-9): '))
         target_class = int(input('input target class(0-9): '))
 
         if sample_class<0 or sample_class>9 or target_class<0 or target_class>9 :
             print('input is wrong')
+            return
 
         sample_idx = get_mnist_idx(y_test, sample_class)
         target_idx = get_mnist_idx(y_test, target_class)
