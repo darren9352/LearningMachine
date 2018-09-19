@@ -62,9 +62,9 @@ def classify_api(request):
 		sess = tf.Session()
 		backend.set_session(sess)
 
-		# Image preprocess		
+		# Image preprocess
 		print('Modifying image')
-		x = np.expand_dims(preprocess(image),axis=0)
+		x = np.expand_dims(preprocess(image.resize((299, 299))),axis=0)
 		img_shape = [1, 299, 299, 3]
 		x_input = tf.placeholder(tf.float32, shape=img_shape)
 
@@ -74,10 +74,10 @@ def classify_api(request):
 		# Prediction of original image
 		print('prediction of original image')
 		classify_result = get_predictions(d, x, 10)
-
 		# Select attack algorithm and iteration
-		attack_algorithm = 'FGSM'
-		n = 3
+
+		attack_algorithm = request.POST.get("attack", None)
+		n = int(request.POST.get("iterate", None))
 
 		# Start attack
 		result = attack(attack_algorithm, n, d, x_input, x, sess)
@@ -97,7 +97,7 @@ def classify_api(request):
 		data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
 		data["adversarial"] = {}
 		for i in range(len(result)) :
-			data["adversarial"][result[i][1]] = float(result[i][2])   
+			data["adversarial"][result[i][1]] = float(result[i][2])
 			#print('iter:', i, 'name:', result[i][1], 'pred:', result[i][2])
 
 		# Close the session
@@ -111,4 +111,3 @@ def classify_api(request):
 
 def classify(request):
 	return render(request, 'classify.html', {})
-

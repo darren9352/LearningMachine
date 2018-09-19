@@ -24,7 +24,7 @@ def deprocess(input_image):
     img /= 2.
     img += 0.5
     img *= 255. # [-1,1] -> [0,255]
-    #img = image.array_to_img(img).copy() 
+    #img = image.array_to_img(img).copy()
     return img
 
 def preprocess(input_image):
@@ -48,7 +48,7 @@ def get_predictions(d, x, n=10) :
 
 def cw_attack_keras(model, x_input, input_img, sess, n):
     wrap = KerasModelWrapper(model)
-    
+
     cw_params = {'binary_search_steps': 1,
                     'max_iterations': 5,
                     'learning_rate': 2e-3,
@@ -69,7 +69,7 @@ def cw_attack_keras(model, x_input, input_img, sess, n):
 def fgsm_attack_iter(model, x_input, input_img, sess, n):
     wrap = KerasModelWrapper(model)
     eps = 2.0 * 16 / 255.0
-    #eps = 0.1 
+    #eps = 0.1
     fgsm = FastGradientMethod(wrap)
     x_adv = fgsm.generate(x_input, eps=eps, clip_min=-1., clip_max=1.)
     adv_image = sess.run(x_adv, feed_dict={x_input: input_img})
@@ -86,11 +86,11 @@ def attack(algorithm, n, d, x_input, x, sess):
     print(algorithm, 'attack is start')
     if algorithm == 'FGSM':
         result = fgsm_attack(d, n, x_input, x, sess)
-    elif algorithm == 'CW':
+    elif algorithm == 'CWL2':
         result = cw_attack(d, n, x_input, x, sess)
 
     return result
-		
+
 def fgsm_attack(d, n, x_input, x, sess) :
     current_dir = os.path.dirname(__file__)
 
@@ -118,4 +118,3 @@ def cw_attack(d, n, x_input, x, sess) :
     sv_img.save(path)
 
     return decode_predictions(preds, top=10)[0]
-
