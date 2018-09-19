@@ -19,10 +19,16 @@
       function selectModel(num) {
         if(num == '0'){
           document.getElementById('div_algorithm').style.display = "block";
-          document.getElementById('div_model').style.display = "none";
+          var elements = document.getElementsByClassName('div_model');
+          for(var i = 0, length = elements.length; i < length; i++) {
+            elements[i].style.display = 'none';
+          }
         } else {
           document.getElementById('div_algorithm').style.display = "none";
-          document.getElementById('div_model').style.display = "block";
+          var elements = document.getElementsByClassName('div_model');
+          for(var i = 0, length = elements.length; i < length; i++) {
+            elements[i].style.display = 'block';
+          }
         }
       }
     </script>
@@ -38,9 +44,9 @@
         <option value="cwl2">CWL2</option>
       </select>
     </div>
-    <div class="input-field col s6 offset-s2" id="div_model" style="position:absolute;margin-top:1px;display:none;">
+    <div class="input-field col s1 offset-s2 div_model" style="position:absolute;margin-top:1px;display:none;">
       <select style="display:inline;" id="mnist_number">
-        <option value="" disabled selected>Choose your MNIST number</option>
+        <option value="" disabled selected>Sample</option>
         <option value="0">0</option>
         <option value="1">1</option>
         <option value="2">2</option>
@@ -51,6 +57,29 @@
         <option value="7">7</option>
         <option value="8">8</option>
         <option value="9">9</option>
+      </select>
+    </div>
+    <div class="input-field col s1 offset-s3 div_model" style="position:absolute;margin-top:1px;display:none;">
+      <select style="display:inline;" id="target_number">
+        <option value="" disabled selected>Target</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+    </div>
+    <div class="input-field col s4 offset-s4 div_model" style="position:absolute;margin-top:1px;display:none;">
+      <select style="display:inline;" id="mnist_attack_algorithm">
+        <option value="" disabled selected>Choose your Attack Algorithm</option>
+        <option value="fgsm">FGSM</option>
+        <option value="jsma">JSMA</option>
+        <option value="cwl2">CWL2</option>
       </select>
     </div>
     <div class="col s4 offset-s8">
