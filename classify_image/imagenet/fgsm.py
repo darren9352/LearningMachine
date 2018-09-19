@@ -83,12 +83,13 @@ def fgsm_attack_iter(model, x_input, input_img, sess, n):
 
 
 def attack(algorithm, n, d, x_input, x, sess):
-	if algorithm == 'FGSM'
-		result = fgsm_attack(d, n, x_input, x, sess)
-	elif algorithm == 'CW':
-		result = cw_attack(d, n, x_input, x, sess)
+    print(algorithm, 'attack is start')
+    if algorithm == 'FGSM':
+        result = fgsm_attack(d, n, x_input, x, sess)
+    elif algorithm == 'CW':
+        result = cw_attack(d, n, x_input, x, sess)
 
-	return result
+    return result
 		
 def fgsm_attack(d, n, x_input, x, sess) :
     current_dir = os.path.dirname(__file__)

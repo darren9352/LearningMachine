@@ -40,7 +40,7 @@ def classify_api(request):
 
 	if request.method == "POST":
 		tmp_f = NamedTemporaryFile()
-        tmp_adver = NamedTemporaryFile()
+		tmp_adver = NamedTemporaryFile()
 
 		if request.FILES.get("image", None) is not None:
 			image_request = request.FILES["image"]
@@ -57,10 +57,10 @@ def classify_api(request):
 		tmp_f.close()
 
 		# Backend session for attack
+		print('Building Backend Session.')
 		K.set_learning_phase(0)
 		sess = tf.Session()
 		backend.set_session(sess)
-		print('Building Backend Session.')
 
 		# Image preprocess		
 		print('Modifying image')
@@ -68,39 +68,42 @@ def classify_api(request):
 		img_shape = [1, 299, 299, 3]
 		x_input = tf.placeholder(tf.float32, shape=img_shape)
 
-		# define model
+		# Define model
 		d = discriminator()
 
-		#prediction of original image
+		# Prediction of original image
 		print('prediction of original image')
 		classify_result = get_predictions(d, x, 10)
 
-		print('attack start.')
+		# Select attack algorithm and iteration
 		attack_algorithm = 'FGSM'
 		n = 3
+
+		# Start attack
 		result = attack(attack_algorithm, n, d, x_input, x, sess)
 
-        with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
-            img_str = base64.b64encode(img_file.read())
-        tmp_adver.write(base64.b64decode(img_str))
-        tmp_adver.close()
+		# Print image to web site
+		with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
+			img_str = base64.b64encode(img_file.read())
+		tmp_adver.write(base64.b64decode(img_str))
+		tmp_adver.close()
 
-        data["success"] = True
-        data["confidence"] = {}
-        for i in range(len(classify_result)) :
-            data["confidence"][classify_result[i][1]] = float(classify_result[i][2])
+		# Make Graph
+		data["success"] = True
+		data["confidence"] = {}
+		for i in range(len(classify_result)) :
+			data["confidence"][classify_result[i][1]] = float(classify_result[i][2])
 
-        data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
-        data["adversarial"] = {}
-        for i in range(len(result)) :
-            data["adversarial"][result[i][1]] = float(result[i][2])   
+		data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
+		data["adversarial"] = {}
+		for i in range(len(result)) :
+			data["adversarial"][result[i][1]] = float(result[i][2])   
 
-        sess.close()
+		# Close the session
+		sess.close()
                  
-    return JsonResponse(data)
-
-
+	return JsonResponse(data)
 
 def classify(request):
-    return render(request, 'classify.html', {})
+	return render(request, 'classify.html', {})
 
