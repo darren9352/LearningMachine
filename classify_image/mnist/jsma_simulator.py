@@ -21,28 +21,52 @@ from mnist_handle import get_mnist_idx
 
 FLAGS = flags.FLAGS
 
-def get_mnist_idx(y_test, want_class) :
-    for i in range(10000) :
-        if np.argmax(y_test[i]) == want_class :
-            return i
+abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
+SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
+
+def mnist_jsma_attack(sample, target, model, sess) :
+    # Instantiate a SaliencyMapMethod attack object
+    jsma = SaliencyMapMethod(model, back='tf', sess=sess)
+    jsma_params = {'theta': 1., 'gamma': 0.1,
+            'clip_min': 0., 'clip_max': 1.,
+            'y_target': None}
+    jsma_params['y_target'] = target
+    adv_x = jsma.generate_np(sample, **jsma_params)
+    return adv_x
 
 def simulate_jsma():
     # MNIST-specific dimensions
-    # img_rows = 28
-    # img_cols = 28
-    # channels = 1
+    img_rows = 28
+    img_cols = 28
+    channels = 1
 
     # Get MNIST test data
     x_test, y_test = get_mnist_data()
 
     # Define input TF placeholder
-    x = tf.placeholder(tf.float32, shape=(None, 28, 28, 1))
+    x = tf.placeholder(tf.float32, shape=(None, img_rows, img_cols, channels))
     y = tf.placeholder(tf.float32, shape=(None, 10))
 
     # Define TF model graph
     model = ModelBasicCNN('model1', 10, 64)
     preds = model.get_logits(x)
     print("Defined TensorFlow model graph.")
+
+    ############ Select sample and target class ############
+    sample_class = int(input('input sample class(0-9): '))
+    target_class = int(input('input target class(0-9): '))
+
+    if sample_class<0 or sample_class>9 or target_class<0 or target_class>9 :
+        print('input is wrong')
+        return
+
+    sample_idx = get_mnist_idx(y_test, sample_class)
+    target_idx = get_mnist_idx(y_test, target_class)
+
+    sample = x_test[sample_idx:sample_idx+1]
+    target = y_test[target_idx:target_idx+1]
+    ############ ############################## ############
+
 
     ##################################
     #          Load Model            #
@@ -56,19 +80,10 @@ def simulate_jsma():
         path = os.path.join(current_dir, 'model/mnist_model.ckpt')
         saver.restore(sess, path)
 
-        sample_class = int(input('input sample class(0-9): '))
-        target_class = int(input('input target class(0-9): '))
-
-        if sample_class<0 or sample_class>9 or target_class<0 or target_class>9 :
-            print('input is wrong')
-            return
-
-        sample_idx = get_mnist_idx(y_test, sample_class)
-        target_idx = get_mnist_idx(y_test, target_class)
-
-        sample = x_test[sample_idx:sample_idx+1]
+        adv_x = mnist_jsma_attack(sample, target, model, sess)
 
         # Instantiate a SaliencyMapMethod attack object
+        """
         jsma = SaliencyMapMethod(model, back='tf', sess=sess)
         jsma_params = {'theta': 1., 'gamma': 0.1,
                     'clip_min': 0., 'clip_max': 1.,
@@ -76,12 +91,13 @@ def simulate_jsma():
 
         jsma_params['y_target'] = y_test[target_idx:target_idx+1]
         adv_x = jsma.generate_np(sample, **jsma_params)
+        """
+
 
         print('sample class:', np.argmax(y_test[sample_idx]))
         print('target class:', np.argmax(y_test[target_idx]))
 
         # Get array of output
-        # updated by hak hyun kim
         feed_dict = {x: adv_x}
         probabilities = sess.run(preds, feed_dict)
 
@@ -90,9 +106,7 @@ def simulate_jsma():
             e_x = np.exp(x - np.max(x))
             return e_x / e_x.sum()
         print(softmax(probabilities))
-        #print(probabilities)
         print('==========================================')
-
         print('{} class is recognized by {} '.format(sample_class, target_class))
 
 
@@ -101,10 +115,9 @@ def simulate_jsma():
     from PIL import Image
     save_image = Image.fromarray(two_d_img)
     save_image = save_image.convert('RGB')
-    save_image.save("res.png")
+    save_image.save(SAVE_PATH)
 
     sess.close()
-    #return report
 
 def main(argv=None):
     simulate_jsma()

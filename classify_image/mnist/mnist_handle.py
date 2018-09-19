@@ -28,9 +28,7 @@ def to_categorical(y, num_classes=None):
     return categorical
 
 def get_mnist_data(datadir='/tmp/'):
-
     import mnist
-
     X_test = mnist.test_images() / 255.
     Y_test = mnist.test_labels()
 
