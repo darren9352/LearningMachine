@@ -3,23 +3,52 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
+
 import numpy as np
+from six.moves import xrange
 import tensorflow as tf
 from tensorflow.python.platform import flags
-
 import logging
-import os
+
+from cleverhans.attacks import SaliencyMapMethod
+from cleverhans.attacks import FastGradientMethod
 from cleverhans.attacks import CarliniWagnerL2
-from cleverhans.utils import set_log_level
+from cleverhans.utils import other_classes, set_log_level
 from cleverhans_tutorials.tutorial_models import ModelBasicCNN
 
 from mnist_handle import get_mnist_data
 from mnist_handle import get_mnist_idx
 
-FLAGS = flags.FLAGS
-
 abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
 SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
+
+# MNIST-specific dimensions
+img_rows = 28
+img_cols = 28
+channels = 1
+
+def mnist_jsma_attack(sample, target, model, sess) :
+    # Instantiate a SaliencyMapMethod attack object
+    jsma = SaliencyMapMethod(model, back='tf', sess=sess)
+    jsma_params = {'theta': 1., 'gamma': 0.1,
+            'clip_min': 0., 'clip_max': 1.,
+            'y_target': None}
+    jsma_params['y_target'] = target
+    adv_x = jsma.generate_np(sample, **jsma_params)
+    return adv_x
+
+def mnist_fgsm_attack(sample, target, model, sess) :
+    fgsm_params = {
+        'eps': 0.2,
+        'clip_min': 0.,
+        'clip_max': 1.
+    }
+    fgsm = FastGradientMethod(model, sess=sess)
+    adv = fgsm.generate_np(sample, **fgsm_params)
+    #for i in range(5):
+    #    adv = fgsm.generate_np(adv, **fgsm_params)
+    return adv
 
 def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=10) :
     cw = CarliniWagnerL2(model, back='tf', sess=sess)
@@ -42,28 +71,13 @@ def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iteration
     adv = cw.generate_np(adv_input, **cw_params)
     return adv
 
-def mnist_tutorial_cw(nb_classes=10, attack_iterations=100, targeted=True):
-
-    # MNIST-specific dimensions
-    img_rows = 28
-    img_cols = 28
-    channels = 1
-
-    # Set TF random seed to improve reproducibility
-    tf.set_random_seed(1234)
-
-    # Create TF session
-    sess = tf.Session()
-    print("Created TensorFlow session.")
-
-    set_log_level(logging.DEBUG)
-
+def mnist_attack():
     # Get MNIST test data
     x_test, y_test = get_mnist_data()
 
     # Define input TF placeholder
     x = tf.placeholder(tf.float32, shape=(None, img_rows, img_cols, channels))
-    y = tf.placeholder(tf.float32, shape=(None, nb_classes))
+    y = tf.placeholder(tf.float32, shape=(None, 10))
 
     # Define TF model graph
     model = ModelBasicCNN('model1', 10, 64)
@@ -97,44 +111,33 @@ def mnist_tutorial_cw(nb_classes=10, attack_iterations=100, targeted=True):
         path = os.path.join(current_dir, 'model/mnist_model.ckpt')
         saver.restore(sess, path)
 
-        ###########################################################################
-        # Craft adversarial examples using Carlini and Wagner's approach
-        ###########################################################################
-        #nb_adv_per_sample = str(nb_classes - 1) if targeted else '1'
-        #print('Crafting ' + str(1) + ' * ' + nb_adv_per_sample +
-        #    ' adversarial examples')
+        #adv_x = mnist_jsma_attack(sample, target, model, sess)
+        #adv_x = mnist_fgsm_attack(sample, target, model, sess)
+        adv_x = mnist_cw_attack(sample, target, model, sess)
 
-        # Instantiate a CW attack object
-        adv = mnist_cw_attack(sample, target, model, sess)
 
-        # Prediction
-        feed_dict = {x: adv}
+        print('sample class:', np.argmax(y_test[sample_idx]))
+        print('target class:', np.argmax(y_test[target_idx]))
+
+        # Get array of output
+        feed_dict = {x: adv_x}
         probabilities = sess.run(preds, feed_dict)
-        print(probabilities)
 
-        #Save adversial image
-        two_d_img = (np.reshape(adv, (28, 28)) * 255).astype(np.uint8)
-        from PIL import Image
-        save_image = Image.fromarray(two_d_img)
-        save_image = save_image.convert('RGB')
-        save_image.save(SAVE_PATH)
+        print('==========================================')
+        def softmax(x):
+            e_x = np.exp(x - np.max(x))
+            return e_x / e_x.sum()
+        print(softmax(probabilities))
+        print('==========================================')
+        print('{} class is recognized by {} '.format(sample_class, target_class))
+    
+    # save the adverisal image #
+    two_d_img = (np.reshape(adv_x, (28, 28)) * 255).astype(np.uint8)
+    from PIL import Image
+    save_image = Image.fromarray(two_d_img)
+    save_image = save_image.convert('RGB')
+    save_image.save(SAVE_PATH)
 
-        # Close TF session
-        sess.close()
-    return
+    sess.close()
 
-
-def main(argv=None):
-    mnist_tutorial_cw(nb_classes=FLAGS.nb_classes,
-                      attack_iterations=FLAGS.attack_iterations,
-                      targeted=FLAGS.targeted)
-
-
-if __name__ == '__main__':
-    flags.DEFINE_integer('nb_classes', 10, 'Number of output classes')
-    flags.DEFINE_integer('attack_iterations', 100,
-                         'Number of iterations to run attack; 1000 is good')
-    flags.DEFINE_boolean('targeted', True,
-                         'Run the tutorial in targeted mode?')
-
-    tf.app.run()
+mnist_attack()

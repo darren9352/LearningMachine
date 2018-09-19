@@ -122,47 +122,6 @@ def mnist_tutorial(train_start=0, train_end=1000, test_start=0,
         print('Repeating the process, using adversarial training')
 
 
-"""
-    # Create a new model and train it to be robust to FastGradientMethod
-    model2 = ModelBasicCNN('model2', 10, nb_filters)
-    fgsm2 = FastGradientMethod(model2, sess=sess)
-
-    def attack(x):
-        return fgsm2.generate(x, **fgsm_params)
-
-    loss2 = LossCrossEntropy(model2, smoothing=0.1, attack=attack)
-    preds2 = model2.get_logits(x)
-    adv_x2 = attack(x)
-
-    if not backprop_through_attack:
-        # For the fgsm attack used in this tutorial, the attack has zero
-        # gradient so enabling this flag does not change the gradient.
-        # For some other attacks, enabling this flag increases the cost of
-        # training, but gives the defender the ability to anticipate how
-        # the atacker will change their strategy in response to updates to
-        # the defender's parameters.
-        adv_x2 = tf.stop_gradient(adv_x2)
-    preds2_adv = model2.get_logits(adv_x2)
-
-    def evaluate2():
-        # Accuracy of adversarially trained model on legitimate test inputs
-        do_eval(preds2, x_test, y_test, 'adv_train_clean_eval', False)
-        # Accuracy of the adversarially trained model on adversarial examples
-        do_eval(preds2_adv, x_test, y_test, 'adv_train_adv_eval', True)
-
-    # Perform and evaluate adversarial training
-    train(sess, loss2, x, y, x_train, y_train, evaluate=evaluate2,
-          args=train_params, rng=rng, var_list=model2.get_params())
-
-    # Calculate training errors
-    if testing:
-        do_eval(preds2, x_train, y_train, 'train_adv_train_clean_eval')
-        do_eval(preds2_adv, x_train, y_train, 'train_adv_train_adv_eval')
-
-
-    return report
-"""
-
 def main(argv=None):
     mnist_tutorial(nb_epochs=FLAGS.nb_epochs, batch_size=FLAGS.batch_size,
                    learning_rate=FLAGS.learning_rate,
