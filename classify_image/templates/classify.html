@@ -15,12 +15,42 @@
 
 <body>
   <div class="container row" style="width:100%; max-width:100%; max-height: 100%;">
-    <div class="input-field col s8" style="position:absolute;margin-top:1px;">
+    <script>
+      function selectModel(num) {
+        if(num == '0'){
+          document.getElementById('div_algorithm').style.display = "block";
+          document.getElementById('div_model').style.display = "none";
+        } else {
+          document.getElementById('div_algorithm').style.display = "none";
+          document.getElementById('div_model').style.display = "block";
+        }
+      }
+    </script>
+    <div class="col s2" style="position:absolute;">
+      <input type="radio" id="imagenet" name="selected_model" value="imagenet" onclick="selectModel('0');"checked/> <label for="imagenet">ImageNet</label>
+      <input type="radio" id="mnist" name="selected_model" value="mnist" onclick="selectModel('1');" /> <label for="mnist">MNIST</label>
+    </div>
+    <div class="input-field col s6 offset-s2" id="div_algorithm" style="position:absolute;margin-top:1px;">
       <select style="display:inline;" id="attack_algorithm">
         <option value="" disabled selected>Choose your Attack Algorithm</option>
         <option value="fgsm">FGSM</option>
         <option value="jsma">JSMA</option>
         <option value="cwl2">CWL2</option>
+      </select>
+    </div>
+    <div class="input-field col s6 offset-s2" id="div_model" style="position:absolute;margin-top:1px;display:none;">
+      <select style="display:inline;" id="mnist_number">
+        <option value="" disabled selected>Choose your MNIST number</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
       </select>
     </div>
     <div class="col s4 offset-s8">
