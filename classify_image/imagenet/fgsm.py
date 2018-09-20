@@ -64,6 +64,8 @@ def deepfool_attack(model, n, x_input, input_img, sess):
         nb_candidate=2, clip_min=-1., clip_max=1.)
     adv_img = sess.run(adv_x, feed_dict={x_input: input_img})
 
+    #noise = x - res
+    #save_image(noise)
     save_image(adv_img)
     preds = model.predict(adv_img)
     return decode_predictions(preds, top=10)[0]
@@ -116,12 +118,16 @@ def attack(algorithm, n, d, x_input, x, sess):
 
 def fgsm_attack(d, n, x_input, x, sess) :
     res = fgsm_attack_iter(d, x_input, x, sess, n)
+    #noise = x - res
+    #save_image(noise)
     save_image(res)
     preds = d.predict(res)
     return decode_predictions(preds, top=10)[0]
 
 def cw_attack(d, n, x_input, x, sess) :
     res = cw_attack_keras(d, x_input, x, sess, n)
+    #noise = x - res
+    #save_image(noise)
     save_image(res)
     preds = d.predict(res)
     return decode_predictions(preds, top=10)[0]
