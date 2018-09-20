@@ -19,6 +19,9 @@ TARGET_CLASS=849 # teapot
 #TARGET_CLASS=1 # goldfish
 IMAGE_PATH="img/01f824264783f58d.png"
 
+#abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
+#SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
+
 def deprocess(input_image):
     img = input_image.copy()
     img /= 2.
@@ -44,6 +47,25 @@ def show_predictions(d, x, n=10):
 
 def get_predictions(d, x, n=10) :
     preds = d.predict(x)
+    return decode_predictions(preds, top=10)[0]
+
+def save_image(adv_img):
+    print('save the adv image.')
+    d_img = deprocess(adv_img[0]).astype(np.uint8)
+    sv_img = Image.fromarray(d_img)
+    current_dir = os.path.dirname(__file__)
+    path = os.path.join(current_dir, 'output/testtest.png')
+    sv_img.save(path)
+
+def deepfool_attack(model, n, x_input, input_img, sess):
+    wrap = KerasModelWrapper(model)
+    deepfool = DeepFool(wrap, sess=sess)
+    adv_x = deepfool.generate(x=x_input, over_shoot=0.02, max_iter=n,
+        nb_candidate=2, clip_min=-1., clip_max=1.)
+    adv_img = sess.run(adv_x, feed_dict={x_input: input_img})
+
+    save_image(adv_img)
+    preds = model.predict(adv_img)
     return decode_predictions(preds, top=10)[0]
 
 def cw_attack_keras(model, x_input, input_img, sess, n):
@@ -88,33 +110,18 @@ def attack(algorithm, n, d, x_input, x, sess):
         result = fgsm_attack(d, n, x_input, x, sess)
     elif algorithm == 'CWL2':
         result = cw_attack(d, n, x_input, x, sess)
-
+    else :
+        result = deepfool_attack(d, n, x_input, x, sess)
     return result
 
 def fgsm_attack(d, n, x_input, x, sess) :
-    current_dir = os.path.dirname(__file__)
-
     res = fgsm_attack_iter(d, x_input, x, sess, n)
-
+    save_image(res)
     preds = d.predict(res)
-
-    d_img = deprocess(res[0]).astype(np.uint8)
-    sv_img = Image.fromarray(d_img)
-    path = os.path.join(current_dir, 'output/testtest.png')
-    sv_img.save(path)
-
     return decode_predictions(preds, top=10)[0]
 
 def cw_attack(d, n, x_input, x, sess) :
-
     res = cw_attack_keras(d, x_input, x, sess, n)
-
+    save_image(res)
     preds = d.predict(res)
-
-    d_img = deprocess(res[0]).astype(np.uint8)
-    sv_img = Image.fromarray(d_img)
-    current_dir = os.path.dirname(__file__)
-    path = os.path.join(current_dir, 'output/testtest.png')
-    sv_img.save(path)
-
     return decode_predictions(preds, top=10)[0]
