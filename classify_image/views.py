@@ -18,7 +18,7 @@ current_dir = os.path.dirname(__file__)
 from tensorflow.contrib.slim.nets import inception
 
 from keras.utils import to_categorical
-from keras.preprocessing import image
+#from keras.preprocessing import image
 from keras.applications.inception_v3 import InceptionV3, decode_predictions
 from keras.layers.core import K
 from keras import backend
@@ -80,7 +80,11 @@ def classify_api(request):
 		n = int(request.POST.get("iterate", None))
 
 		# Start attack
+		# import time
+		# start_time = time.time() 
 		result = attack(attack_algorithm, n, d, x_input, x, sess)
+		# attack_time = time.time() - start_time
+		# print("--- %s seconds ---" %(attack_time))
 
 		# Print image to web site
 		with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
