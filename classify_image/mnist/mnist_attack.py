@@ -22,6 +22,7 @@ from classify_image.mnist.mnist_handle import get_mnist_idx
 
 abs_path = os.path.dirname(__file__)
 SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
+SAVE_NOISE_PATH = os.path.join(abs_path, 'output/noise.png')
 INPUT_PATH = os.path.join(abs_path, 'dataset/images/testtest.png')
 
 # MNIST-specific dimensions
@@ -31,27 +32,35 @@ channels = 1
 
 def mnist_jsma_attack(sample, target, model, sess) :
     # Instantiate a SaliencyMapMethod attack object
+    import time
+    start_time = time.time() 
     jsma = SaliencyMapMethod(model, back='tf', sess=sess)
     jsma_params = {'theta': 1., 'gamma': 0.1,
             'clip_min': 0., 'clip_max': 1.,
-            'y_target': None}
-    jsma_params['y_target'] = target
+            'y_target': target}
     adv_x = jsma.generate_np(sample, **jsma_params)
-    return adv_x
+    for i in range(1) :
+        adv_x = jsma.generate_np(adv_x, **jsma_params)
+    attack_time = time.time() - start_time
+    return adv_x, attack_time
 
 def mnist_fgsm_attack(sample, target, model, sess) :
     fgsm_params = {
-        'eps': 0.2,
+        'eps': 0.1,
         'clip_min': 0.,
-        'clip_max': 1.
+        'clip_max': 1.,
+		'y_target': target
     }
+    import time
+    start_time = time.time() 
     fgsm = FastGradientMethod(model, sess=sess)
     adv = fgsm.generate_np(sample, **fgsm_params)
-    #for i in range(5):
-    #    adv = fgsm.generate_np(adv, **fgsm_params)
-    return adv
+    for i in range(3):
+        adv = fgsm.generate_np(adv, **fgsm_params)
+    attack_time = time.time() - start_time
+    return adv, attack_time
 
-def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=10) :
+def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=500) :
     cw = CarliniWagnerL2(model, back='tf', sess=sess)
 
     if targeted:
@@ -62,15 +71,18 @@ def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iteration
         adv_input = sample
         adv_ys = None
         yname = "y"
-    cw_params = {'binary_search_steps': 1,
+    cw_params = {'binary_search_steps': 4,
                 yname: adv_ys,
                 'max_iterations': attack_iterations,
-                'learning_rate': 0.1,
+                'learning_rate': 0.2,
                 'batch_size': 1,
                 'initial_const': 10}
 
+    import time
+    start_time = time.time() 
     adv = cw.generate_np(adv_input, **cw_params)
-    return adv
+    attack_time = time.time() - start_time
+    return adv, attack_time
 
 def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     # Get MNIST test data
@@ -117,15 +129,15 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         saver.restore(sess, path)
 
         if mnist_algorithm == 'JSMA':
-            adv_x = mnist_jsma_attack(sample, target, model, sess)
+            adv_x, attack_time = mnist_jsma_attack(sample, target, model, sess)
         elif mnist_algorithm == 'FGSM':
-            adv_x = mnist_fgsm_attack(sample, target, model, sess)
+            adv_x, attack_time = mnist_fgsm_attack(sample, target, model, sess)
         elif mnist_algorithm == 'CWL2':
-            adv_x = mnist_cw_attack(sample, target, model, sess)
+            adv_x, attack_time = mnist_cw_attack(sample, target, model, sess)
 
 
-        print('sample class:', np.argmax(y_test[sample_idx]))
-        print('target class:', np.argmax(y_test[target_idx]))
+        #print('sample class:', np.argmax(y_test[sample_idx]))
+        #print('target class:', np.argmax(y_test[target_idx]))
 
         # Get array of output
         feed_dict = {x: adv_x}
@@ -141,6 +153,14 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         print('==========================================')
         print('{} class is recognized by {} '.format(sample_class, target_class))
 
+    # save the noise #
+    noise = adv_x[0] - sample[0]
+    two_d_img = (np.reshape(noise, (28, 28)) * 255).astype(np.uint8)
+    from PIL import Image
+    save_image = Image.fromarray(two_d_img)
+    save_image = save_image.convert('RGB')
+    save_image.save(SAVE_NOISE_PATH)
+
     # save the adverisal image #
     two_d_img = (np.reshape(adv_x, (28, 28)) * 255).astype(np.uint8)
     from PIL import Image
@@ -149,4 +169,4 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     save_image.save(SAVE_PATH)
 
     sess.close()
-    return result
+    return result, attack_time

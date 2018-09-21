@@ -56,7 +56,7 @@ def classify_api(request):
 				image_bytes = image_request.read()
 				image.save(tmp_f, image.format)
 
-			elif request.POST.get("image64", None) is not None:
+			elif request.POST.get("image64", None) is not None:		
 				base64_data = request.POST.get("image64", None).split(',', 1)[1]
 				plain_data = base64.b64decode(base64_data)
 				image = Image.open(io.BytesIO(plain_data))
@@ -92,9 +92,9 @@ def classify_api(request):
 			# Start attack
 			# import time
 			# start_time = time.time()
-			result = attack(attack_algorithm, n, d, x_input, x, sess)
+			result, attack_time = attack(attack_algorithm, n, d, x_input, x, sess)
 			# attack_time = time.time() - start_time
-			# print("--- %s seconds ---" %(attack_time))
+			print("--- %s seconds ---" %(attack_time))
 
 			# Print image to web site
 			with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
@@ -107,8 +107,9 @@ def classify_api(request):
 			mnist_sample = int(request.POST.get("sample", None))
 			mnist_target = int(request.POST.get("target", None))
 			mnist_algorithm = request.POST.get("mnist_algorithm", None)
-			result = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
-
+			result, attack_time = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
+			print("--- %s seconds ---" %(attack_time))
+			
 			result = result.tolist()
 			with open(os.path.join(current_dir,'mnist/dataset/images/testtest.png'), 'rb') as input_file:
 				input_str = base64.b64encode(input_file.read())
@@ -144,9 +145,9 @@ def classify_api(request):
 			data["input_image"] = 'data:image/png;base64,' + input_str.decode('utf-8')
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
 			data["adversarial"] = {}
-			print(len(result[0]))
+			#print(len(result[0]))
 			for i in range(len(result[0])) :
-				print(result[0][i])
+				#print(result[0][i])
 				data["adversarial"][str(i)] = float(result[0][i])
 
 
