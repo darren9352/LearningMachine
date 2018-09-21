@@ -22,8 +22,12 @@ $(document).ready(function() {
         url: '/classify_image/classify/api/',
         data: {
           'image64': $('#img-card').attr('src'),
-          'attack': $("#attack_algorithm option:selected" ).text(),
-          'iterate': $('#iterate').val()
+          'attack': $("#attack_algorithm option:selected").text(),
+          'iterate': $('#iterate').val(),
+          'model': $('input:radio[name=selected_model]:checked').val(),
+          'sample':$("#mnist_number option:selected").text(),
+          'target':$("#target_number option:selected").text(),
+          'mnist_algorithm':$("#mnist_attack_algorithm option:selected").text(),
         },
         dataType: 'text',
         success: function(data) {
@@ -35,7 +39,7 @@ $(document).ready(function() {
     }
   });
 
-  $('#go-back, #go-start').click(function() {
+  $('#go-back, #go-start', '#mnist-go-back').click(function() {
     $('#img-card').removeAttr("src");
     $('#stat-table').html('');
     switchAdver(0);
@@ -45,7 +49,38 @@ $(document).ready(function() {
   $('#upload-button').click(function() {
     $('.modal').modal('open');
   });
+  $('#mnist-upload-button').click(function() {
+    $('.modal').modal('open');
+  });
 });
+switchInput = function(cardNo) {
+  var containers = [".dd-container", ".mnist-uf-container"];
+  var visibleContainer = containers[cardNo];
+  for (var i = 0; i < containers.length; i++) {
+    var oz = (containers[i] === visibleContainer) ? '1' : '0';
+
+    $(containers[i]).animate({
+      opacity: oz
+    }, {
+      duration: 200,
+      queue: false,
+    }).css("z-index", oz);
+  }
+}
+switchModel = function(cardNo) {
+  var containers = [".dd-container", ".mnist-dd-container"];
+  var visibleContainer = containers[cardNo];
+  for (var i = 0; i < containers.length; i++) {
+    var oz = (containers[i] === visibleContainer) ? '1' : '0';
+
+    $(containers[i]).animate({
+      opacity: oz
+    }, {
+      duration: 200,
+      queue: false,
+    }).css("z-index", oz);
+  }
+}
 switchAdver = function(cardNo) {
   var containers = [".ad-temp-container", ".ad-container"];
   var visibleContainer = containers[cardNo];
@@ -100,12 +135,22 @@ loadStats = function(jsonData) {
       duration:200,
       queue: false,
     }).css("z-index", 0);
+    $('.mnist-uf-button').animate({
+      opacity: 0
+    }, {
+      duration:200,
+      queue: false,
+    }).css("z-index", 0);
   //switchCard(2);
   var data = JSON.parse(jsonData);
   var chartData = [{x:[], y:[], type:'bar'}];
   var adverData = [{x:[], y:[], type:'bar'}];
   if (data["success"] == true) {
     $('#adver-card').attr('src', data["adverimage"])
+    if (data["model"] == 'mnist') {
+      $('#mnist-img-card').attr('src', data["input_image"]);
+      switchInput(1);
+    }
     switchAdver(1);
     for (category in data['confidence']) {
       var percent = Math.round(parseFloat(data["confidence"][category]) * 100);

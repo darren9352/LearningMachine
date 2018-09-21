@@ -17,11 +17,12 @@ from cleverhans.attacks import CarliniWagnerL2
 from cleverhans.utils import other_classes, set_log_level
 from cleverhans_tutorials.tutorial_models import ModelBasicCNN
 
-from mnist_handle import get_mnist_data
-from mnist_handle import get_mnist_idx
+from classify_image.mnist.mnist_handle import get_mnist_data
+from classify_image.mnist.mnist_handle import get_mnist_idx
 
-abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
+abs_path = os.path.dirname(__file__)
 SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
+INPUT_PATH = os.path.join(abs_path, 'dataset/images/testtest.png')
 
 # MNIST-specific dimensions
 img_rows = 28
@@ -71,31 +72,35 @@ def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iteration
     adv = cw.generate_np(adv_input, **cw_params)
     return adv
 
-def mnist_attack():
+def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     # Get MNIST test data
     x_test, y_test = get_mnist_data()
-
     # Define input TF placeholder
     x = tf.placeholder(tf.float32, shape=(None, img_rows, img_cols, channels))
     y = tf.placeholder(tf.float32, shape=(None, 10))
-
     # Define TF model graph
     model = ModelBasicCNN('model1', 10, 64)
     preds = model.get_logits(x)
     print("Defined TensorFlow model graph.")
 
     ############ Select sample and target class ############
-    sample_class = int(input('input sample class(0-9): '))
-    target_class = int(input('input target class(0-9): '))
+    # sample_class = sample
+    # target_class = target
 
     if sample_class<0 or sample_class>9 or target_class<0 or target_class>9 :
         print('input is wrong')
         return
-
     sample_idx = get_mnist_idx(y_test, sample_class)
     target_idx = get_mnist_idx(y_test, target_class)
 
     sample = x_test[sample_idx:sample_idx+1]
+    # save the adverisal image #
+    two_d_img = (np.reshape(sample, (28, 28)) * 255).astype(np.uint8)
+    from PIL import Image
+    save_image = Image.fromarray(two_d_img)
+    save_image = save_image.convert('RGB')
+    save_image.save(INPUT_PATH)
+
     target = y_test[target_idx:target_idx+1]
     ############ ############################## ############
 
@@ -106,14 +111,17 @@ def mnist_attack():
     init_op = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init_op)
-        saver = tf.train.import_meta_graph('./model/mnist_model.ckpt.meta')
+        saver = tf.train.import_meta_graph(os.path.join(abs_path,'model/mnist_model.ckpt.meta'))
         current_dir = os.getcwd()
-        path = os.path.join(current_dir, 'model/mnist_model.ckpt')
+        path = os.path.join(abs_path, 'model/mnist_model.ckpt')
         saver.restore(sess, path)
 
-        #adv_x = mnist_jsma_attack(sample, target, model, sess)
-        #adv_x = mnist_fgsm_attack(sample, target, model, sess)
-        adv_x = mnist_cw_attack(sample, target, model, sess)
+        if mnist_algorithm == 'JSMA':
+            adv_x = mnist_jsma_attack(sample, target, model, sess)
+        elif mnist_algorithm == 'FGSM':
+            adv_x = mnist_fgsm_attack(sample, target, model, sess)
+        elif mnist_algorithm == 'CWL2':
+            adv_x = mnist_cw_attack(sample, target, model, sess)
 
 
         print('sample class:', np.argmax(y_test[sample_idx]))
@@ -127,10 +135,12 @@ def mnist_attack():
         def softmax(x):
             e_x = np.exp(x - np.max(x))
             return e_x / e_x.sum()
-        print(softmax(probabilities))
+
+        result = softmax(probabilities)
+        print(result)
         print('==========================================')
         print('{} class is recognized by {} '.format(sample_class, target_class))
-    
+
     # save the adverisal image #
     two_d_img = (np.reshape(adv_x, (28, 28)) * 255).astype(np.uint8)
     from PIL import Image
@@ -139,5 +149,4 @@ def mnist_attack():
     save_image.save(SAVE_PATH)
 
     sess.close()
-
-mnist_attack()
+    return result

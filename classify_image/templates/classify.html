@@ -23,12 +23,26 @@
           for(var i = 0, length = elements.length; i < length; i++) {
             elements[i].style.display = 'none';
           }
+          switchModel(0);
+          // $('.uf-button').animate({
+          //   opacity: 0
+          // }, {
+          //   duration:200,
+          //   queue: false,
+          // }).css("z-index", 0);
         } else {
           document.getElementById('div_algorithm').style.display = "none";
           var elements = document.getElementsByClassName('div_model');
           for(var i = 0, length = elements.length; i < length; i++) {
             elements[i].style.display = 'block';
           }
+          switchModel(1);
+          // $('.uf-button').animate({
+          //   opacity: 1
+          // }, {
+          //   duration:200,
+          //   queue: false,
+          // }).css("z-index", 1);
         }
       }
     </script>
@@ -40,7 +54,7 @@
       <select style="display:inline;" id="attack_algorithm">
         <option value="" disabled selected>Choose your Attack Algorithm</option>
         <option value="fgsm">FGSM</option>
-        <option value="jsma">JSMA</option>
+        <option value="jsma">DeepFool</option>
         <option value="cwl2">CWL2</option>
       </select>
     </div>
@@ -96,7 +110,6 @@
           <div id="drop-container">
             <i class="material-icons large upload-icon">cloud_upload</i>
             <span class="drag-txt"><b>Drag and drop image here</b></span>
-            <span class="or-txt">or</span>
             <form action="#">
               <div class="waves-effect waves-light btn" id="browse-container">
                 <span>Browse files</span>
@@ -110,6 +123,21 @@
     <div class="col s4 uf-container">
       <div class="card uf-card">
         <img class="card crop" id="img-card" />
+      </div>
+    </div>
+    <div class="col s4 mnist-dd-container">
+      <div class="card mnist-dd-card">
+        <div class="card-content black-text file-field">
+          <div id="mnist-temp-container">
+            <i class="material-icons large upload-icon">looks_6</i>
+            <span class="drag-txt"><b>MNIST Sample</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col s4 mnist-uf-container">
+      <div class="card mnist-uf-card">
+        <img class="card crop" id="mnist-img-card" />
       </div>
     </div>
     <div class="col s4 offset-s4 ad-temp-container">
@@ -160,6 +188,14 @@
       <span>Upload and Detect Image</span>
     </div>
     <div class="waves-effect waves-light btn" id="go-back">
+      <span>Go Back</span>
+    </div>
+  </div>
+  <div class="container col s8 mnist-dd-container mnist-uf-button" style="position:relative">
+    <div class="waves-effect waves-light btn" id="mnist-upload-button">
+      <span>MNIST Upload</span>
+    </div>
+    <div class="waves-effect waves-light btn" id="mnist-go-back">
       <span>Go Back</span>
     </div>
   </div>

@@ -112,7 +112,7 @@ def attack(algorithm, n, d, x_input, x, sess):
         result = fgsm_attack(d, n, x_input, x, sess)
     elif algorithm == 'CWL2':
         result = cw_attack(d, n, x_input, x, sess)
-    else :
+    elif algorithm == 'DeepFool' :
         result = deepfool_attack(d, n, x_input, x, sess)
     return result
 

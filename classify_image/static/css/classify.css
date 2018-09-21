@@ -12,7 +12,7 @@ body {
   height: 100%;
 }
 
-.dd-container, .uf-container, .dt-container, .ad-container, .ad-temp-container {
+.dd-container, .uf-container, .dt-container, .ad-container, .ad-temp-container, .mnist-dd-container, .mnist-uf-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -24,7 +24,7 @@ body {
   opacity: 0;
 }
 
-.uf-container, .ad-container {
+.uf-container, .ad-container, .mnist-dd-container, .mnist-uf-container {
   z-index: 1;
   opacity: 0;
 }
@@ -33,7 +33,7 @@ body {
   z-index: 2;
 }
 
-.dd-card, .uf-card, .dt-card, .ad-temp-card {
+.dd-card, .uf-card, .dt-card, .ad-temp-card, .mnist-dd-card, .mnist-uf-card {
   height: inherit;
 }
 
@@ -41,7 +41,7 @@ body {
   overflow-y: auto;
 }
 
-#drop-container, #temp-container {
+#drop-container, #temp-container, #mnist-temp-container {
   height: calc(100% - 50px);
   border-style: dashed;
   border-color: #34495E;
