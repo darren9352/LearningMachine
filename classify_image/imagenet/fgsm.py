@@ -16,11 +16,6 @@ from cleverhans.attacks import *
 
 IMAGE_SIZE=299
 TARGET_CLASS=849 # teapot
-#TARGET_CLASS=1 # goldfish
-IMAGE_PATH="img/01f824264783f58d.png"
-
-#abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
-#SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
 
 def deprocess(input_image):
     img = input_image.copy()
@@ -49,12 +44,18 @@ def get_predictions(d, x, n=10) :
     preds = d.predict(x)
     return decode_predictions(preds, top=10)[0]
 
-def save_image(adv_img):
-    print('save the adv image.')
+def save_image(adv_img, noise, path):
+    # Save adversarial image
     d_img = deprocess(adv_img[0]).astype(np.uint8)
     sv_img = Image.fromarray(d_img)
     current_dir = os.path.dirname(__file__)
-    path = os.path.join(current_dir, 'output/testtest.png')
+    path = os.path.join(current_dir, path)
+    sv_img.save(path)
+
+    # Save noise
+    d_img = deprocess(100*noise).astype(np.uint8)
+    sv_img = Image.fromarray(d_img)
+    path = os.path.join(current_dir, 'output/noise.png')
     sv_img.save(path)
 
 def deepfool_attack(model, n, x_input, input_img, sess):
@@ -64,9 +65,9 @@ def deepfool_attack(model, n, x_input, input_img, sess):
         nb_candidate=2, clip_min=-1., clip_max=1.)
     adv_img = sess.run(adv_x, feed_dict={x_input: input_img})
 
-    #noise = x - res
+    noise = input_img[0] - adv_img[0]
     #save_image(noise)
-    save_image(adv_img)
+    save_image(adv_img, noise, 'output/testtest.png')
     preds = model.predict(adv_img)
     return decode_predictions(preds, top=10)[0]
 
@@ -118,16 +119,14 @@ def attack(algorithm, n, d, x_input, x, sess):
 
 def fgsm_attack(d, n, x_input, x, sess) :
     res = fgsm_attack_iter(d, x_input, x, sess, n)
-    #noise = x - res
-    #save_image(noise)
-    save_image(res)
+    noise = res[0] - x[0]
+    save_image(res, noise, 'output/testtest.png')
     preds = d.predict(res)
     return decode_predictions(preds, top=10)[0]
 
 def cw_attack(d, n, x_input, x, sess) :
     res = cw_attack_keras(d, x_input, x, sess, n)
-    #noise = x - res
-    #save_image(noise)
-    save_image(res)
+    noise = res[0] - x[0]
+    save_image(res, noise, 'output/testtest.png')
     preds = d.predict(res)
     return decode_predictions(preds, top=10)[0]

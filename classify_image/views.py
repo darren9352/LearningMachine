@@ -56,7 +56,7 @@ def classify_api(request):
 				image_bytes = image_request.read()
 				image.save(tmp_f, image.format)
 
-			elif request.POST.get("image64", None) is not None:
+			elif request.POST.get("image64", None) is not None:		
 				base64_data = request.POST.get("image64", None).split(',', 1)[1]
 				plain_data = base64.b64decode(base64_data)
 				image = Image.open(io.BytesIO(plain_data))

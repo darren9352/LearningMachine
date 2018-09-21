@@ -38,6 +38,28 @@ $(document).ready(function() {
       });
     }
   });
+  
+  $('.modal').modal2({
+    dismissible: false,
+    ready: function(modal, trigger) {
+      $.ajax({
+        type: "POST",
+        url: '/classify_image/classify/api/',
+        data: {
+          'image64': $('#img-card').attr('src'),
+          'attack': $("#attack_algorithm option:selected").text(),
+          'iterate': $('#iterate').val(),
+          'model': $('input:radio[name=selected_model]:checked').val()
+        },
+        dataType: 'text',
+        success: function(data) {
+          loadStats(data)
+        }
+      }).always(function() {
+        modal.modal('close');
+      });
+    }
+  });
 
   $('#go-back, #go-start', '#mnist-go-back').click(function() {
     $('#img-card').removeAttr("src");
@@ -47,7 +69,7 @@ $(document).ready(function() {
   });
 
   $('#upload-button').click(function() {
-    $('.modal').modal('open');
+    $('.modal').modal2('open');
   });
   $('#mnist-upload-button').click(function() {
     $('.modal').modal('open');
