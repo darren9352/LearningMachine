@@ -34,24 +34,24 @@ def mnist_jsma_attack(sample, target, model, sess) :
     jsma = SaliencyMapMethod(model, back='tf', sess=sess)
     jsma_params = {'theta': 1., 'gamma': 0.1,
             'clip_min': 0., 'clip_max': 1.,
-            'y_target': None}
-    jsma_params['y_target'] = target
+            'y_target': target}
     adv_x = jsma.generate_np(sample, **jsma_params)
     return adv_x
 
 def mnist_fgsm_attack(sample, target, model, sess) :
     fgsm_params = {
-        'eps': 0.2,
+        'eps': 0.1,
         'clip_min': 0.,
-        'clip_max': 1.
+        'clip_max': 1.,
+		'y_target': target
     }
     fgsm = FastGradientMethod(model, sess=sess)
     adv = fgsm.generate_np(sample, **fgsm_params)
-    #for i in range(5):
-    #    adv = fgsm.generate_np(adv, **fgsm_params)
+    for i in range(2):
+        adv = fgsm.generate_np(adv, **fgsm_params)
     return adv
 
-def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=10) :
+def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=500) :
     cw = CarliniWagnerL2(model, back='tf', sess=sess)
 
     if targeted:
@@ -62,10 +62,10 @@ def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iteration
         adv_input = sample
         adv_ys = None
         yname = "y"
-    cw_params = {'binary_search_steps': 1,
+    cw_params = {'binary_search_steps': 4,
                 yname: adv_ys,
                 'max_iterations': attack_iterations,
-                'learning_rate': 0.1,
+                'learning_rate': 0.2,
                 'batch_size': 1,
                 'initial_const': 10}
 
