@@ -39,11 +39,22 @@ $(document).ready(function() {
     }
   });
 
-  $('#go-back, #go-start', '#mnist-go-back').click(function() {
+  $('#go-back, #go-start').click(function() {
     $('#img-card').removeAttr("src");
+    $('#mnist-img-card').removeAttr("src");
     $('#stat-table').html('');
     switchAdver(0);
     switchCard(0);
+    checked = $('input:radio[name=selected_model]:checked').val();
+    if(checked == 'mnist'){
+      $('.mnist-pure-container').animate({
+        opacity: 0
+      }, {
+        duration: 200,
+        queue: false,
+      }).css("z-index", 0);
+      switchModel(1);
+    }
   });
 
   $('#upload-button').click(function() {
@@ -130,12 +141,6 @@ loadImage = function(file) {
 loadStats = function(jsonData) {
     showStat();
     $('.uf-button').animate({
-      opacity: 0
-    }, {
-      duration:200,
-      queue: false,
-    }).css("z-index", 0);
-    $('.mnist-uf-button').animate({
       opacity: 0
     }, {
       duration:200,

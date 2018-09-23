@@ -83,13 +83,13 @@ body {
   transform: translate(-50%, 100%);
 }
 
-#upload-button {
+#upload-button, #mnist-upload-button {
   background-color: #1ABC9C;
   position: absolute;
   width: calc(50% - 20px);
 }
 
-#go-back {
+#go-back, #mnist-go-back {
   background-color: #1ABC9C;
   position: absolute;
   width: calc(50% - 20px);
