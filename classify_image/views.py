@@ -90,11 +90,8 @@ def classify_api(request):
 			n = int(request.POST.get("iterate", None))
 
 			# Start attack
-			# import time
-			# start_time = time.time()
-			result = attack(attack_algorithm, n, d, x_input, x, sess)
-			# attack_time = time.time() - start_time
-			# print("--- %s seconds ---" %(attack_time))
+			result, attack_time = attack(attack_algorithm, n, d, x_input, x, sess)
+			print("--- %s seconds ---" %(attack_time))
 
 			# Print image to web site
 			with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
