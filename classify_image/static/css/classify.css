@@ -33,7 +33,7 @@ body {
   z-index: 2;
 }
 
-.dd-card, .uf-card, .dt-card, .ad-temp-card, .mnist-dd-card, .mnist-uf-card {
+.dd-card, .uf-card, .dt-card, .ad-temp-card, .mnist-dd-card, .mnist-uf-card, .result-card {
   height: inherit;
 }
 
@@ -41,7 +41,7 @@ body {
   overflow-y: auto;
 }
 
-#drop-container, #temp-container, #mnist-temp-container {
+#drop-container, #temp-container, #mnist-temp-container, #result {
   height: calc(100% - 50px);
   border-style: dashed;
   border-color: #34495E;

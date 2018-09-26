@@ -55,6 +55,7 @@ $(document).ready(function() {
       }).css("z-index", 0);
       switchModel(1);
     }
+    document.getElementById('result-card').style.display = 'none';
   });
 
   $('#upload-button').click(function() {
@@ -150,6 +151,7 @@ loadStats = function(jsonData) {
   var data = JSON.parse(jsonData);
   var chartData = [{x:[], y:[], type:'bar'}];
   var adverData = [{x:[], y:[], type:'bar'}];
+
   if (data["success"] == true) {
     $('#adver-card').attr('src', data["adverimage"])
     if (data["model"] == 'mnist') {
@@ -157,18 +159,33 @@ loadStats = function(jsonData) {
       switchInput(1);
     }
     switchAdver(1);
+    var original;
+    var adversarial;
+    var original_max = -1;
+    var adversarial_max = -1;
     for (category in data['confidence']) {
       var percent = Math.round(parseFloat(data["confidence"][category]) * 100);
+        if(original_max < percent){
+          original_max = percent;
+          original = category;
+        }
         chartData[0].x.push(category);
         chartData[0].y.push(percent);
     }
     for (category in data['adversarial']) {
       var percent = Math.round(parseFloat(data["adversarial"][category]) * 100);
+        if(adversarial_max < percent){
+          adversarial_max = percent;
+          adversarial = category;
+        }
         adverData[0].x.push(category);
         adverData[0].y.push(percent);
     }
     Plotly.newPlot('stat-table', chartData, {title: 'Original'});
     Plotly.newPlot('adver-table', adverData, {title: 'Adversarial'});
+    document.getElementById('original').innerHTML = original;
+    document.getElementById('adversarial').innerHTML = adversarial;
+    document.getElementById('result-card').style.display = 'block';
   }
 
 }
