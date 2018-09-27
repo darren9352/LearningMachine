@@ -153,7 +153,6 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         elif mnist_algorithm == 'CWL2':
             adv_x = mnist_cw_attack(sample, target, model, sess)
 
-
         #print('sample class:', np.argmax(y_test[sample_idx]))
         #print('target class:', np.argmax(y_test[target_idx]))
 

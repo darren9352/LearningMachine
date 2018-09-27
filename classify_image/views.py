@@ -107,6 +107,7 @@ def classify_api(request):
 			mnist_target = int(request.POST.get("target", None))
 			mnist_algorithm = request.POST.get("mnist_algorithm", None)
 			result = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
+			print('classified by', np.argmax(result))
 
 			result = result.tolist()
 			with open(os.path.join(current_dir,'mnist/dataset/images/testtest.png'), 'rb') as input_file:
@@ -143,9 +144,7 @@ def classify_api(request):
 			data["input_image"] = 'data:image/png;base64,' + input_str.decode('utf-8')
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
 			data["adversarial"] = {}
-			#print(len(result[0]))
 			for i in range(len(result[0])) :
-				#print(result[0][i])
 				data["adversarial"][str(i)] = float(result[0][i])
 
 
