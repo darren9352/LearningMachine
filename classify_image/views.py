@@ -24,6 +24,7 @@ from keras.applications.inception_v3 import InceptionV3, decode_predictions
 from keras.layers.core import K
 from keras import backend
 
+import sys
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 def clean_directory() :
@@ -92,6 +93,7 @@ def classify_api(request):
 			# Start attack
 			result, attack_time = attack(attack_algorithm, n, d, x_input, x, sess)
 			print("--- %s seconds ---" %(attack_time))
+			print('classified by ', result[0][1])
 
 			# Print image to web site
 			with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
@@ -141,9 +143,9 @@ def classify_api(request):
 			data["input_image"] = 'data:image/png;base64,' + input_str.decode('utf-8')
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
 			data["adversarial"] = {}
-			print(len(result[0]))
+			#print(len(result[0]))
 			for i in range(len(result[0])) :
-				print(result[0][i])
+				#print(result[0][i])
 				data["adversarial"][str(i)] = float(result[0][i])
 
 
