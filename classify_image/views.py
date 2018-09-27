@@ -91,8 +91,8 @@ def classify_api(request):
 			n = int(request.POST.get("iterate", None))
 
 			# Start attack
-			result, attack_time = attack(attack_algorithm, n, d, x_input, x, sess)
-			print("--- %s seconds ---" %(attack_time))
+			result, attack_speed = attack(attack_algorithm, n, d, x_input, x, sess)
+			print("--- %s seconds ---" %(attack_speed))
 			print('classified by ', result[0][1])
 
 			# Print image to web site
@@ -106,7 +106,8 @@ def classify_api(request):
 			mnist_sample = int(request.POST.get("sample", None))
 			mnist_target = int(request.POST.get("target", None))
 			mnist_algorithm = request.POST.get("mnist_algorithm", None)
-			result = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
+			result, attack_speed = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
+			print("--- %s seconds ---" %(attack_speed))
 			print('classified by', np.argmax(result))
 
 			result = result.tolist()
@@ -120,6 +121,7 @@ def classify_api(request):
 			tmp_adver.close()
 
 		# Make Graph
+		data["attack_speed"] = attack_speed
 		data["success"] = True
 		data["confidence"] = {}
 		if model == 'imagenet':
@@ -150,10 +152,6 @@ def classify_api(request):
 
 		# Close the session
 		# sess.close()
-
-		# Sort data by value
-		# sorted(data["confidence"].items(), key=lambda x: x[1])
-		# sorted(data["adversarial"].items(), key=lambda x: x[1])
 	return JsonResponse(data)
 
 def classify(request):

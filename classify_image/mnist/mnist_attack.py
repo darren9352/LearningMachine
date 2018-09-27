@@ -16,6 +16,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from cleverhans.attacks import SaliencyMapMethod
 from cleverhans.attacks import FastGradientMethod
 from cleverhans.attacks import CarliniWagnerL2
+from cleverhans.attacks import DeepFool
 from cleverhans.utils import other_classes, set_log_level
 from cleverhans.attacks_tf import imgs_stamp_tf 
 
@@ -102,6 +103,14 @@ def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iteration
     adv = cw.generate_np(adv_input, **cw_params)
     return adv
 
+def mnist_deepfool_attack(sample, target, model, sess, targeted=True, attack_iterations=100) :
+    print('deepfool attack start')
+    deepfool = DeepFool(model, sess=sess)
+    deepfool_params = { 'over_shoot': 0.02, 'clip_min': 0.,
+                'clip_max': 1., 'max_iter': 300, 'nb_candidate': 2,}
+    adv_x = deepfool.generate_np(sample, **deepfool_params)
+    return adv_x
+
 def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     # Get MNIST test data
     x_test, y_test = get_mnist_data()
@@ -146,29 +155,27 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         path = os.path.join(abs_path, 'model/mnist_model.ckpt')
         saver.restore(sess, path)
 
+        import time
+        start_time = time.time() 
         if mnist_algorithm == 'JSMA':
             adv_x = mnist_jsma_attack(sample, target, model, sess)
         elif mnist_algorithm == 'FGSM':
             adv_x = mnist_fgsm_attack(sample, target, model, sess)
         elif mnist_algorithm == 'CWL2':
             adv_x = mnist_cw_attack(sample, target, model, sess)
-
-        #print('sample class:', np.argmax(y_test[sample_idx]))
-        #print('target class:', np.argmax(y_test[target_idx]))
+        elif mnist_algorithm == 'DeepFool':
+            adv_x = mnist_deepfool_attack(sample, target, model, sess)
+        attack_time = time.time() - start_time
 
         # Get array of output
         feed_dict = {x: adv_x}
         probabilities = sess.run(preds, feed_dict)
 
-        #print('==========================================')
         def softmax(x):
             e_x = np.exp(x - np.max(x))
             return e_x / e_x.sum()
 
         result = softmax(probabilities)
-        #print(result)
-        #print('==========================================')
-        #print('{} class is recognized by {} '.format(sample_class, target_class))
 
     # save the adverisal image #
     two_d_img = (np.reshape(adv_x, (28, 28)) * 255).astype(np.uint8)
@@ -198,4 +205,4 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     imgs_stamp_tf.clear()
     
     sess.close()
-    return result
+    return result, attack_time
