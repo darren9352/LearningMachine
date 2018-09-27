@@ -92,8 +92,9 @@ def classify_api(request):
 
 			# Start attack
 			result, attack_speed = attack(attack_algorithm, n, d, x_input, x, sess)
-			print("--- %s seconds ---" %(attack_speed))
-			print('classified by ', result[0][1])
+			print("attack speed: %s seconds" %(round(attack_speed, 6)))
+			print('original image:', classify_result[0][1])
+			print('adversarial example is classified by', result[0][1])
 
 			# Print image to web site
 			with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
@@ -107,8 +108,9 @@ def classify_api(request):
 			mnist_target = int(request.POST.get("target", None))
 			mnist_algorithm = request.POST.get("mnist_algorithm", None)
 			result, attack_speed = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
-			print("--- %s seconds ---" %(attack_speed))
-			print('classified by', np.argmax(result))
+			print("attack speed: %s seconds" %(round(attack_speed, 6)))
+			print('original class:', mnist_sample, 'target class:', mnist_target)
+			print('adversarial example is classified by', np.argmax(result))
 
 			result = result.tolist()
 			with open(os.path.join(current_dir,'mnist/dataset/images/testtest.png'), 'rb') as input_file:

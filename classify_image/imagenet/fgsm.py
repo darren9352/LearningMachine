@@ -148,13 +148,14 @@ def attack(algorithm, n, d, x_input, x, sess):
         result, attack_time = cw_attack(d, n, x_input, x, sess)
     elif algorithm == 'DeepFool' :
         result, attack_time = deepfool_attack(d, n, x_input, x, sess)
+    print('attack is ended')
 
     sv_img = []
     for img in imgs_stamp_tf :
         d_img = deprocess(img[0]).astype(np.uint8)
         sv_img.append(Image.fromarray(d_img))
 
-    print('save gif image.')
+    #print('save gif image.')
     sv_img[0].save('final_df_giftest.gif',
                save_all=True,
                append_images=sv_img[1:],

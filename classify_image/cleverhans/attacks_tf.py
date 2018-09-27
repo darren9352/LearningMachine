@@ -328,7 +328,6 @@ def jsma(sess,
 
     adv_x = copy.copy(sample)
 
-    print('append origin image')
     tmp = copy.deepcopy(adv_x)
     imgs_stamp_tf.append(tmp)
     
@@ -432,7 +431,6 @@ def jsma(sess,
     # Compute the ratio of pixels perturbed by the algorithm
     percent_perturbed = float(iteration * 2) / nb_features
 
-    print('stamp size:', len(imgs_stamp_tf))
     # save the gif image #
     
     """
@@ -541,15 +539,11 @@ def jsma_symbolic(x, y_target, model, theta, gamma, clip_min, clip_max):
     :param clip_max: maximum value for components of the example returned
     :return: a tensor for the adversarial example
     """
-
-    print('this is jsma symbolic!')
-
     nb_classes = int(y_target.shape[-1].value)
     nb_features = int(np.product(x.shape[1:]).value)
 
     max_iters = np.floor(nb_features * gamma / 2)
     increase = bool(theta > 0)
-    print('max iters:', max_iters)
 
     tmp = np.ones((nb_features, nb_features), int)
     np.fill_diagonal(tmp, 0)
@@ -573,15 +567,12 @@ def jsma_symbolic(x, y_target, model, theta, gamma, clip_min, clip_max):
     # cond_in: the boolean tensor to show if more iteration is needed for
     #          generating adversarial samples
     def condition(x_in, y_in, domain_in, i_in, cond_in):
-        print('this is condition!!')
         # Repeat the loop until we have achieved misclassification or
         # reaches the maximum iterations
-        print(tf.logical_and(tf.less(i_in, max_iters), cond_in))
         return tf.logical_and(tf.less(i_in, max_iters), cond_in)
 
     # Same loop variables as above
     def body(x_in, y_in, domain_in, i_in, cond_in):
-        print('this is body!!')
         preds = model.get_probs(x_in)
         preds_onehot = tf.one_hot(tf.argmax(preds, axis=1), depth=nb_classes)
 

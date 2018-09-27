@@ -57,7 +57,7 @@ def mnist_fgsm_attack(sample, target, model, sess) :
     fgsm = FastGradientMethod(model, sess=sess)
     adv = fgsm.generate_np(sample, **fgsm_params)
     imgs_stamp_tf.append(adv)
-    for i in range(4):
+    for i in range(2):
         adv = fgsm.generate_np(adv, **fgsm_params)
         imgs_stamp_tf.append(adv)
 
@@ -155,6 +155,8 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         path = os.path.join(abs_path, 'model/mnist_model.ckpt')
         saver.restore(sess, path)
 
+        print(mnist_algorithm, 'attack start')
+
         import time
         start_time = time.time() 
         if mnist_algorithm == 'JSMA':
@@ -166,6 +168,8 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         elif mnist_algorithm == 'DeepFool':
             adv_x = mnist_deepfool_attack(sample, target, model, sess)
         attack_time = time.time() - start_time
+
+        print('attack is ended')
 
         # Get array of output
         feed_dict = {x: adv_x}
