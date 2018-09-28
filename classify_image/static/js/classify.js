@@ -65,6 +65,7 @@ $(document).ready(function() {
     $('.modal').modal('open');
   });
 });
+
 switchInput = function(cardNo) {
   var containers = [".dd-container", ".mnist-uf-container"];
   var visibleContainer = containers[cardNo];
@@ -149,8 +150,8 @@ loadStats = function(jsonData) {
     }).css("z-index", 0);
   //switchCard(2);
   var data = JSON.parse(jsonData);
-  var chartData = [{x:[], y:[], type:'bar'}];
-  var adverData = [{x:[], y:[], type:'bar'}];
+  var chartData = [{x:[], y:[], type:'bar', text: [], textposition: 'auto'}];
+  var adverData = [{x:[], y:[], type:'bar', text: [], textposition: 'auto'}];
 
   if (data["success"] == true) {
     $('#adver-card').attr('src', data["adverimage"])
@@ -163,6 +164,8 @@ loadStats = function(jsonData) {
     var adversarial;
     var original_max = -1;
     var adversarial_max = -1;
+	var attack_speed = data["attack_speed"];
+	attack_speed = attack_speed.toFixed(5);
     for (category in data['confidence']) {
       var percent = Math.round(parseFloat(data["confidence"][category]) * 100);
         if(original_max < percent){
@@ -171,6 +174,7 @@ loadStats = function(jsonData) {
         }
         chartData[0].x.push(category);
         chartData[0].y.push(percent);
+		chartData[0].text.push(percent);
     }
     for (category in data['adversarial']) {
       var percent = Math.round(parseFloat(data["adversarial"][category]) * 100);
@@ -180,12 +184,44 @@ loadStats = function(jsonData) {
         }
         adverData[0].x.push(category);
         adverData[0].y.push(percent);
+		adverData[0].text.push(percent);
     }
-    Plotly.newPlot('stat-table', chartData, {title: 'Original'});
-    Plotly.newPlot('adver-table', adverData, {title: 'Adversarial'});
+	
+	origin_layout = {
+		autosize: false,
+		title: 'Original',
+		width: 470,
+		height: 170,
+		margin: {
+		l: 35,
+		r: 35,
+		b: 45,
+		t: 50,
+		pad: 2
+		}
+	};
+	
+	adver_layout = {
+		autosize: false,
+		title: 'Adversarial',
+		width: 470,
+		height: 170,
+		margin: {
+		l: 35,
+		r: 35,
+		b: 45,
+		t: 50,
+		pad: 2
+		}
+	};
+
+    Plotly.newPlot('stat-table', chartData, origin_layout);
+    Plotly.newPlot('adver-table', adverData, adver_layout);
     document.getElementById('original').innerHTML = original;
     document.getElementById('adversarial').innerHTML = adversarial;
+	document.getElementById('attack_speed').innerHTML = attack_speed;
     document.getElementById('result-card').style.display = 'block';
+
   }
 
 }

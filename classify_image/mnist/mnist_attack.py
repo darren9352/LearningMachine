@@ -11,12 +11,17 @@ import tensorflow as tf
 from tensorflow.python.platform import flags
 import logging
 
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from cleverhans.attacks import SaliencyMapMethod
 from cleverhans.attacks import FastGradientMethod
 from cleverhans.attacks import CarliniWagnerL2
+from cleverhans.attacks import DeepFool
 from cleverhans.utils import other_classes, set_log_level
-from cleverhans_tutorials.tutorial_models import ModelBasicCNN
+from cleverhans.attacks_tf import imgs_stamp_tf 
 
+sys.path.append(os.path.dirname(__file__))
+from mymodel import ModelBasicCNN
 from classify_image.mnist.mnist_handle import get_mnist_data
 from classify_image.mnist.mnist_handle import get_mnist_idx
 
@@ -30,28 +35,51 @@ img_cols = 28
 channels = 1
 
 def mnist_jsma_attack(sample, target, model, sess) :
-    # Instantiate a SaliencyMapMethod attack object
     jsma = SaliencyMapMethod(model, back='tf', sess=sess)
-    jsma_params = {'theta': 1., 'gamma': 0.1,
+    jsma_params = {'theta': 1., 'gamma': 3,
             'clip_min': 0., 'clip_max': 1.,
             'y_target': None}
     jsma_params['y_target'] = target
-    adv_x = jsma.generate_np(sample, **jsma_params)
-    return adv_x
+
+    adv = jsma.generate_np(sample, **jsma_params)
+    return adv
 
 def mnist_fgsm_attack(sample, target, model, sess) :
+    #imgs = []
+    imgs_stamp_tf.append(sample)
+
     fgsm_params = {
-        'eps': 0.2,
+        'eps': 0.1,
         'clip_min': 0.,
-        'clip_max': 1.
+        'clip_max': 1.,
+        'y_target': target
     }
     fgsm = FastGradientMethod(model, sess=sess)
     adv = fgsm.generate_np(sample, **fgsm_params)
-    #for i in range(5):
-    #    adv = fgsm.generate_np(adv, **fgsm_params)
+    imgs_stamp_tf.append(adv)
+    for i in range(2):
+        adv = fgsm.generate_np(adv, **fgsm_params)
+        imgs_stamp_tf.append(adv)
+
+    # save the gif image #
+    """
+    from PIL import Image
+    sv_imgs = []
+    for img in imgs_stamp_tf:
+        two_d_img = (np.reshape(img, (28, 28)) * 255).astype(np.uint8)
+        save_image = Image.fromarray(two_d_img)
+        save_image = save_image.convert('RGB')
+        sv_imgs.append(save_image)
+
+    sv_imgs[0].save('fgsm_test_mnist.gif',
+               save_all=True,
+               append_images=sv_imgs[1:],
+               duration=100,
+               loop=0)
+    """
     return adv
 
-def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=10) :
+def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=100) :
     cw = CarliniWagnerL2(model, back='tf', sess=sess)
 
     if targeted:
@@ -62,15 +90,26 @@ def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iteration
         adv_input = sample
         adv_ys = None
         yname = "y"
-    cw_params = {'binary_search_steps': 1,
+    cw_params = {'binary_search_steps': 1, 'abort_early': False,
                 yname: adv_ys,
+                'confidence' : 1,
                 'max_iterations': attack_iterations,
                 'learning_rate': 0.1,
-                'batch_size': 1,
+                #'batch_size': 1,
+                'clip_min': 0.,
+                'clip_max': 1.,
                 'initial_const': 10}
 
     adv = cw.generate_np(adv_input, **cw_params)
     return adv
+
+def mnist_deepfool_attack(sample, target, model, sess, targeted=True, attack_iterations=100) :
+    print('deepfool attack start')
+    deepfool = DeepFool(model, sess=sess)
+    deepfool_params = { 'over_shoot': 0.02, 'clip_min': 0.,
+                'clip_max': 1., 'max_iter': 300, 'nb_candidate': 2,}
+    adv_x = deepfool.generate_np(sample, **deepfool_params)
+    return adv_x
 
 def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     # Get MNIST test data
@@ -116,30 +155,31 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         path = os.path.join(abs_path, 'model/mnist_model.ckpt')
         saver.restore(sess, path)
 
+        print(mnist_algorithm, 'attack start')
+
+        import time
+        start_time = time.time() 
         if mnist_algorithm == 'JSMA':
             adv_x = mnist_jsma_attack(sample, target, model, sess)
         elif mnist_algorithm == 'FGSM':
             adv_x = mnist_fgsm_attack(sample, target, model, sess)
         elif mnist_algorithm == 'CWL2':
             adv_x = mnist_cw_attack(sample, target, model, sess)
+        elif mnist_algorithm == 'DeepFool':
+            adv_x = mnist_deepfool_attack(sample, target, model, sess)
+        attack_time = time.time() - start_time
 
-
-        print('sample class:', np.argmax(y_test[sample_idx]))
-        print('target class:', np.argmax(y_test[target_idx]))
+        print('attack is ended')
 
         # Get array of output
         feed_dict = {x: adv_x}
         probabilities = sess.run(preds, feed_dict)
 
-        print('==========================================')
         def softmax(x):
             e_x = np.exp(x - np.max(x))
             return e_x / e_x.sum()
 
         result = softmax(probabilities)
-        print(result)
-        print('==========================================')
-        print('{} class is recognized by {} '.format(sample_class, target_class))
 
     # save the adverisal image #
     two_d_img = (np.reshape(adv_x, (28, 28)) * 255).astype(np.uint8)
@@ -148,5 +188,25 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     save_image = save_image.convert('RGB')
     save_image.save(SAVE_PATH)
 
+    # save gif image #
+    #from PIL import Image
+    
+    sv_imgs = []
+    #from cleverhans.attacks_tf import imgs_stamp_tf 
+    for i in range(len(imgs_stamp_tf)):
+        two_d_img = (np.reshape(imgs_stamp_tf[i], (28, 28)) * 255).astype(np.uint8)
+        save_image = Image.fromarray(two_d_img)
+        save_image = save_image.convert('RGB')
+        sv_imgs.append(save_image)
+        #name = 'jsma_test ' + str(i) + '.png'
+        #save_image.save(name)
+
+    sv_imgs[0].save('final_mnist_test.gif',
+               save_all=True,
+               append_images=sv_imgs[1:],
+               duration=100,
+               loop=0)
+    imgs_stamp_tf.clear()
+    
     sess.close()
-    return result
+    return result, attack_time

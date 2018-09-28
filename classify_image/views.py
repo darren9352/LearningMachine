@@ -24,6 +24,7 @@ from keras.applications.inception_v3 import InceptionV3, decode_predictions
 from keras.layers.core import K
 from keras import backend
 
+import sys
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 def clean_directory() :
@@ -90,11 +91,10 @@ def classify_api(request):
 			n = int(request.POST.get("iterate", None))
 
 			# Start attack
-			# import time
-			# start_time = time.time()
-			result = attack(attack_algorithm, n, d, x_input, x, sess)
-			# attack_time = time.time() - start_time
-			# print("--- %s seconds ---" %(attack_time))
+			result, attack_speed = attack(attack_algorithm, n, d, x_input, x, sess)
+			print("attack speed: %s seconds" %(round(attack_speed, 6)))
+			print('original image:', classify_result[0][1])
+			print('adversarial example is classified by', result[0][1])
 
 			# Print image to web site
 			with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
@@ -107,7 +107,10 @@ def classify_api(request):
 			mnist_sample = int(request.POST.get("sample", None))
 			mnist_target = int(request.POST.get("target", None))
 			mnist_algorithm = request.POST.get("mnist_algorithm", None)
-			result = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
+			result, attack_speed = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
+			print("attack speed: %s seconds" %(round(attack_speed, 6)))
+			print('original class:', mnist_sample, 'target class:', mnist_target)
+			print('adversarial example is classified by', np.argmax(result))
 
 			result = result.tolist()
 			with open(os.path.join(current_dir,'mnist/dataset/images/testtest.png'), 'rb') as input_file:
@@ -120,6 +123,7 @@ def classify_api(request):
 			tmp_adver.close()
 
 		# Make Graph
+		data["attack_speed"] = attack_speed
 		data["success"] = True
 		data["confidence"] = {}
 		if model == 'imagenet':
@@ -144,18 +148,12 @@ def classify_api(request):
 			data["input_image"] = 'data:image/png;base64,' + input_str.decode('utf-8')
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
 			data["adversarial"] = {}
-			print(len(result[0]))
 			for i in range(len(result[0])) :
-				print(result[0][i])
 				data["adversarial"][str(i)] = float(result[0][i])
 
 
 		# Close the session
 		# sess.close()
-
-		# Sort data by value
-		# sorted(data["confidence"].items(), key=lambda x: x[1])
-		# sorted(data["adversarial"].items(), key=lambda x: x[1])
 	return JsonResponse(data)
 
 def classify(request):

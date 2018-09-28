@@ -108,6 +108,7 @@
         <option value="fgsm">FGSM</option>
         <option value="jsma">JSMA</option>
         <option value="cwl2">CWL2</option>
+		<option value="deepfool">DeepFool</option>
       </select>
     </div>
     <div class="col s4 offset-s8">
@@ -171,9 +172,10 @@
       <div class="card dt-card" id="adver-table">
       </div>
       <div class="card result-card"id="result-card"style="display:none; height:17%">
-        <div class="card-content black-text file-field" style="padding:15px">
-          <div id="result" style="height:calc(100% - 30px); text-align:center;">
-            <p style="vertical-align:middle; font-size:1.5em"><span id="original" style="color:blue;font-weight:bold;"></span> is recognized by <span id="adversarial" style="color:red;font-weight:bold;"></span></p>
+        <div class="card-content black-text file-field" style="padding:5px">
+          <div id="result" style="height:calc(100% - 15px); text-align:center;">
+            <p><span id="original" style="color:blue;font-weight:bold;"></span> is recognized by <span id="adversarial" style="color:red;font-weight:bold;"></span></p>
+			<p>attack speed : <span id="attack_speed" style="color:black;font-weight:bold;"></span> seconds</p>
           </div>
         </div>
       </div>
