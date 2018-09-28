@@ -186,33 +186,13 @@ loadStats = function(jsonData) {
         adverData[0].y.push(percent);
 		adverData[0].text.push(percent);
     }
-	
+
 	origin_layout = {
-		autosize: false,
 		title: 'Original',
-		width: 420,
-		height: 160,
-		margin: {
-		l: 35,
-		r: 35,
-		b: 45,
-		t: 50,
-		pad: 2
-		}
 	};
-	
+
 	adver_layout = {
-		autosize: false,
 		title: 'Adversarial',
-		width: 420,
-		height: 160,
-		margin: {
-		l: 35,
-		r: 35,
-		b: 45,
-		t: 50,
-		pad: 2
-		}
 	};
 
     Plotly.newPlot('stat-table', chartData, origin_layout);
