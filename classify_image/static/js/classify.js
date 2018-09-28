@@ -190,8 +190,8 @@ loadStats = function(jsonData) {
 	origin_layout = {
 		autosize: false,
 		title: 'Original',
-		width: 470,
-		height: 170,
+		width: 420,
+		height: 160,
 		margin: {
 		l: 35,
 		r: 35,
@@ -204,8 +204,8 @@ loadStats = function(jsonData) {
 	adver_layout = {
 		autosize: false,
 		title: 'Adversarial',
-		width: 470,
-		height: 170,
+		width: 420,
+		height: 160,
 		margin: {
 		l: 35,
 		r: 35,
