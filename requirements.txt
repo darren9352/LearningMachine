@@ -3,4 +3,3 @@ Pillow
 gunicorn
 tensorflow
 WhiteNoise
-cleverhans
