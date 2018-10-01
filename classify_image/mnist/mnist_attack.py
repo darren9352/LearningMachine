@@ -27,6 +27,7 @@ from classify_image.mnist.mnist_handle import get_mnist_idx
 
 abs_path = os.path.dirname(__file__)
 SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
+SAVE_GIF_PATH = os.path.join(abs_path, 'output/testgif.gif')
 INPUT_PATH = os.path.join(abs_path, 'dataset/images/testtest.png')
 
 # MNIST-specific dimensions
@@ -60,23 +61,6 @@ def mnist_fgsm_attack(sample, target, model, sess) :
     for i in range(2):
         adv = fgsm.generate_np(adv, **fgsm_params)
         imgs_stamp_tf.append(adv)
-
-    # save the gif image #
-    """
-    from PIL import Image
-    sv_imgs = []
-    for img in imgs_stamp_tf:
-        two_d_img = (np.reshape(img, (28, 28)) * 255).astype(np.uint8)
-        save_image = Image.fromarray(two_d_img)
-        save_image = save_image.convert('RGB')
-        sv_imgs.append(save_image)
-
-    sv_imgs[0].save('fgsm_test_mnist.gif',
-               save_all=True,
-               append_images=sv_imgs[1:],
-               duration=100,
-               loop=0)
-    """
     return adv
 
 def mnist_cw_attack(sample, target, model, sess, targeted=True, attack_iterations=100) :
@@ -201,7 +185,7 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         #name = 'jsma_test ' + str(i) + '.png'
         #save_image.save(name)
 
-    sv_imgs[0].save('final_mnist_test.gif',
+    sv_imgs[0].save(SAVE_GIF_PATH,
                save_all=True,
                append_images=sv_imgs[1:],
                duration=100,

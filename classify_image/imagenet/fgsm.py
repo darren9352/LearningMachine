@@ -18,12 +18,7 @@ from cleverhans.attacks import *
 from cleverhans.attacks_tf import imgs_stamp_tf 
 
 IMAGE_SIZE=299
-TARGET_CLASS=849 # teapot
-#TARGET_CLASS=1 # goldfish
-IMAGE_PATH="img/01f824264783f58d.png"
-
-#abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
-#SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
+current_dir = os.path.dirname(__file__)
 
 def deprocess(input_image):
     img = input_image.copy()
@@ -56,7 +51,6 @@ def save_image(adv_img, noise, path):
     # Save adversarial image
     d_img = deprocess(adv_img[0]).astype(np.uint8)
     sv_img = Image.fromarray(d_img)
-    current_dir = os.path.dirname(__file__)
     path = os.path.join(current_dir, path)
     sv_img.save(path)
 
@@ -110,13 +104,11 @@ def fgsm_attack_iter(model, x_input, input_img, sess, n):
     import time
     start_time = time.time() 
     x_adv = fgsm.generate(x_input, **fgsm_params)
-    #adv_image = sess.run(x_adv, feed_dict={x_input: input_img})
     for i in range(n):
         if i == 0:
             adv_image = sess.run(x_adv, feed_dict={x_input: input_img})
         else:
             adv_image = sess.run(x_adv, feed_dict={x_input: adv_image})
-        #print('append the adv image')
         imgs_stamp_tf.append(adv_image)
     
     attack_time = time.time() - start_time
@@ -155,8 +147,8 @@ def attack(algorithm, n, d, x_input, x, sess):
         d_img = deprocess(img[0]).astype(np.uint8)
         sv_img.append(Image.fromarray(d_img))
 
-    #print('save gif image.')
-    sv_img[0].save('final_df_giftest.gif',
+    path = os.path.join(current_dir, './output/testgif.gif')
+    sv_img[0].save(path,
                save_all=True,
                append_images=sv_img[1:],
                duration=100,

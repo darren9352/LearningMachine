@@ -51,6 +51,7 @@ def classify_api(request):
 		if model == 'imagenet':
 			tmp_f = NamedTemporaryFile()
 			tmp_adver = NamedTemporaryFile()
+			tmp_adver_gif = NamedTemporaryFile()
 
 			if request.FILES.get("image", None) is not None:
 				image_request = request.FILES["image"]
@@ -101,8 +102,10 @@ def classify_api(request):
 				img_str = base64.b64encode(img_file.read())
 			tmp_adver.write(base64.b64decode(img_str))
 			tmp_adver.close()
+
 		elif model == 'mnist':
 			tmp_adver = NamedTemporaryFile()
+			tmp_adver_gif = NamedTemporaryFile()
 			tmp_f = NamedTemporaryFile()
 			mnist_sample = int(request.POST.get("sample", None))
 			mnist_target = int(request.POST.get("target", None))
@@ -122,19 +125,25 @@ def classify_api(request):
 			tmp_adver.write(base64.b64decode(img_str))
 			tmp_adver.close()
 
+			with open(os.path.join(current_dir,'mnist/output/testgif.gif'), 'rb') as gif_file:
+				gif_str = base64.b64encode(gif_file.read())
+			tmp_adver_gif.write(base64.b64decode(gif_str))
+			tmp_adver_gif.close()
+
 		# Make Graph
 		data["attack_speed"] = attack_speed
 		data["success"] = True
 		data["confidence"] = {}
+
 		if model == 'imagenet':
 			data["model"] = 'imagenet'
 			for i in range(len(classify_result)) :
 				data["confidence"][classify_result[i][1]] = float(classify_result[i][2])
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
+			#data["adverimage_gif"] = 'data:image/gif;base64,' + gif_str.decode('utf-8')
 			data["adversarial"] = {}
 			for i in range(len(result)) :
 				data["adversarial"][result[i][1]] = float(result[i][2])
-				#print('iter:', i, 'name:', result[i][1], 'pred:', result[i][2])
 
 			sess.close()
 
@@ -147,6 +156,7 @@ def classify_api(request):
 					data["confidence"][str(i)] = float(0)
 			data["input_image"] = 'data:image/png;base64,' + input_str.decode('utf-8')
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
+			data["adverimage_gif"] = 'data:image/gif;base64,' + gif_str.decode('utf-8')
 			data["adversarial"] = {}
 			for i in range(len(result[0])) :
 				data["adversarial"][str(i)] = float(result[0][i])
