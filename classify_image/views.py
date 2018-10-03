@@ -98,7 +98,7 @@ def classify_api(request):
 			print('adversarial example is classified by', result[0][1])
 
 			# Print image to web site
-			with open(os.path.join(current_dir,'imagenet/output/testtest.gif'), 'rb') as img_file:
+			with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
 				img_str = base64.b64encode(img_file.read())
 			tmp_adver.write(base64.b64decode(img_str))
 			tmp_adver.close()
@@ -115,12 +115,14 @@ def classify_api(request):
 			mnist_sample = int(request.POST.get("sample", None))
 			mnist_target = int(request.POST.get("target", None))
 			mnist_algorithm = request.POST.get("mnist_algorithm", None)
-			result, attack_speed = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
+			sample_result, adver_result, attack_speed = mnist_attack_func(mnist_sample, mnist_target, mnist_algorithm)
 			print("attack speed: %s seconds" %(round(attack_speed, 5)))
 			print('original class:', mnist_sample, 'target class:', mnist_target)
-			print('adversarial example is classified by', np.argmax(result))
+			print('adversarial example is classified by', np.argmax(adver_result))
 
-			result = result.tolist()
+			sample_result = sample_result.tolist()
+			adver_result = adver_result.tolist()
+
 			with open(os.path.join(current_dir,'mnist/dataset/images/testtest.png'), 'rb') as input_file:
 				input_str = base64.b64encode(input_file.read())
 			tmp_f.write(base64.b64decode(input_str))
@@ -154,21 +156,15 @@ def classify_api(request):
 
 		elif model == 'mnist':
 			data["model"] = 'mnist'
-			for i in range(10):
-				if i == mnist_sample:
-					data["confidence"][str(i)] = float(1)
-				else:
-					data["confidence"][str(i)] = float(0)
+			for i in range(len(sample_result[0])) :
+				data["confidence"][str(i)] = float(sample_result[0][i])
 			data["input_image"] = 'data:image/png;base64,' + input_str.decode('utf-8')
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
 			data["adverimage_gif"] = 'data:image/gif;base64,' + gif_str.decode('utf-8')
 			data["adversarial"] = {}
-			for i in range(len(result[0])) :
-				data["adversarial"][str(i)] = float(result[0][i])
+			for i in range(len(adver_result[0])) :
+				data["adversarial"][str(i)] = float(adver_result[0][i])
 
-
-		# Close the session
-		# sess.close()
 	return JsonResponse(data)
 
 def classify(request):

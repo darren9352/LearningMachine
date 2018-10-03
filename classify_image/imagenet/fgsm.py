@@ -97,9 +97,10 @@ def cw_attack_keras(model, x_input, input_img, sess, n):
 
 def fgsm_attack_iter(model, x_input, input_img, sess, n):
     wrap = KerasModelWrapper(model)
+    imgs_stamp_tf.append(input_img)
 
     fgsm = FastGradientMethod(wrap)
-    fgsm_params = {'eps': 2.0 * 16 / 255.0,
+    fgsm_params = {'eps': 0.1,
                  'clip_min': -1., 'clip_max': 1.}
     import time
     start_time = time.time() 

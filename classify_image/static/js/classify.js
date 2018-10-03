@@ -160,7 +160,7 @@ loadStats = function(jsonData) {
   var adverData = [{x:[], y:[], type:'bar', text: [], textposition: 'auto'}];
 
   if (data["success"] == true) {
-    /*
+    
     $('#adver-card').attr('src', data["adverimage"]);
     $('#adver-card').attr('data-gif', data["adverimage_gif"]);
 
@@ -168,9 +168,9 @@ loadStats = function(jsonData) {
     $('#adver-card').attr('object-position', 'centor');
     $('#adver-card').attr('width', 'inherit');
     $('#adver-card').attr('height', '100%');
-    */
+    
    
-    $('#adver-card').attr('src', data["adverimage_gif"]);
+    //$('#adver-card').attr('src', data["adverimage_gif"]);
 
     if (data["model"] == 'mnist') {
       $('#mnist-img-card').attr('src', data["input_image"]);

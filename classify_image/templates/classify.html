@@ -21,6 +21,8 @@
       function selectModel(num) {
         if(num == '0'){
           document.getElementById('div_algorithm').style.display = "block";
+          document.getElementById('iterate').style.visibility = "visible";
+          document.getElementById('iter_label').style.visibility = "visible";
           var elements = document.getElementsByClassName('div_model');
           for(var i = 0, length = elements.length; i < length; i++) {
             elements[i].style.display = 'none';
@@ -41,6 +43,8 @@
           }).css("z-index", 0);
         } else {
           document.getElementById('div_algorithm').style.display = "none";
+          document.getElementById('iterate').style.visibility = "hidden";
+          document.getElementById('iter_label').style.visibility = "hidden";
           var elements = document.getElementsByClassName('div_model');
           for(var i = 0, length = elements.length; i < length; i++) {
             elements[i].style.display = 'block';
@@ -120,7 +124,7 @@
     </div>
 
     <div class="col s4 offset-s8">
-      <label for="iterate">Iterate</label>
+      <label for="iterate" id="iter_label">Iterate</label>
       <p class="range-field" style="display:inline;">
         <input type="range" id="iterate" min="1" max="30" /></p>
     </div>
@@ -178,14 +182,12 @@
     </div>
 
     <div class="col s4 offset-s4 ad-container">
-      <img class="card gif-card gifplayer" id="adver-card" data-mode="gif"/>
-      <!--
+      <img class="card gifplayer" id="adver-card" data-mode="gif" data-label="view"/>
         <script>
             $(document).ready( function(){
               $('.gifplayer').gifplayer();
             });
-          </script>
-        -->
+        </script>        
     </div>
 
     <div class="col s4 offset-s8 dt-container" style="height:65%">
@@ -230,7 +232,7 @@
 
   <div class="container col s8 uf-container uf-button" style="position:relative">
     <div class="waves-effect waves-light btn" id="upload-button">
-      <span>Upload and Detect Image</span>
+      <span>Upload and Attack Image</span>
     </div>
     <div class="waves-effect waves-light btn" id="go-back">
       <span>Go Back</span>
@@ -238,7 +240,7 @@
   </div>
   <div class="container col s8 mnist-uf-container mnist-uf-button" style="position:relative; z-index:0;">
     <div class="waves-effect waves-light btn" id="mnist-upload-button">
-      <span>MNIST Upload</span>
+      <span>MNIST Upload and Attack Image </span>
     </div>
     <div class="waves-effect waves-light btn" id="mnist-go-back">
       <span>Go Back</span>

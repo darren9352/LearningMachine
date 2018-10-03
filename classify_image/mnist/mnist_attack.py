@@ -106,10 +106,6 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     preds = model.get_logits(x)
     print("Defined TensorFlow model graph.")
 
-    ############ Select sample and target class ############
-    # sample_class = sample
-    # target_class = target
-
     if sample_class<0 or sample_class>9 or target_class<0 or target_class>9 :
         print('input is wrong')
         return
@@ -124,7 +120,6 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     save_image = save_image.convert('RGB')
     save_image.save(INPUT_PATH)
 
-    target = y_test[target_idx:target_idx+1]
     ############ ############################## ############
 
     ##################################
@@ -135,9 +130,19 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     with tf.Session() as sess:
         sess.run(init_op)
         saver = tf.train.import_meta_graph(os.path.join(abs_path,'model/mnist_model.ckpt.meta'))
-        current_dir = os.getcwd()
         path = os.path.join(abs_path, 'model/mnist_model.ckpt')
         saver.restore(sess, path)
+
+        def softmax(x):
+            e_x = np.exp(x - np.max(x))
+            return e_x / e_x.sum()
+
+        feed_dict = {x: sample}
+        sample_probabilities = sess.run(preds, feed_dict)
+
+        sample_result = softmax(sample_probabilities)
+
+        target = y_test[target_idx:target_idx+1]
 
         print(mnist_algorithm, 'attack start')
 
@@ -159,11 +164,7 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
         feed_dict = {x: adv_x}
         probabilities = sess.run(preds, feed_dict)
 
-        def softmax(x):
-            e_x = np.exp(x - np.max(x))
-            return e_x / e_x.sum()
-
-        result = softmax(probabilities)
+        adver_result = softmax(probabilities)
 
     # save the adverisal image #
     two_d_img = (np.reshape(adv_x, (28, 28)) * 255).astype(np.uint8)
@@ -188,9 +189,9 @@ def mnist_attack_func(sample_class, target_class, mnist_algorithm):
     sv_imgs[0].save(SAVE_GIF_PATH,
                save_all=True,
                append_images=sv_imgs[1:],
-               duration=100,
+               duration=40,
                loop=0)
     imgs_stamp_tf.clear()
     
     sess.close()
-    return result, attack_time
+    return sample_result, adver_result, attack_time
