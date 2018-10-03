@@ -147,7 +147,7 @@ def attack(algorithm, n, d, x_input, x, sess):
         d_img = deprocess(img[0]).astype(np.uint8)
         sv_img.append(Image.fromarray(d_img))
 
-    path = os.path.join(current_dir, './output/testgif.gif')
+    path = os.path.join(current_dir, './output/testtest.gif')
     sv_img[0].save(path,
                save_all=True,
                append_images=sv_img[1:],

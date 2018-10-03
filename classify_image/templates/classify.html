@@ -4,14 +4,14 @@
 <head>
   <title>Image Classification</title>
   <link rel="stylesheet" href="{% static 'css/classify.css' %}" type="text/css" />
+  <link rel="stylesheet" href="{% static 'css/gifplayer.css' %}" type="text/css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.1/css/materialize.min.css" />
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.1/js/materialize.min.js"></script>
-  <script src="{% static 'js/libgif.js' %}"></script>
-  <script src="{% static 'js/rubbable.js' %}"></script>
+  <script src="{% static 'js/jquery.gifplayer.js' %}"></script>
   <script src="{% static 'js/classify.js' %}"></script>
 </head>
 
@@ -178,12 +178,14 @@
     </div>
 
     <div class="col s4 offset-s4 ad-container">
-      <img class="card crop" id="adver-card" />
-      <div id="controller-bar">
-          <button id="backward" href="#">|< Step back </button>&nbsp;&nbsp;
-          <button id="play" href="#"> Play | Pause </button>&nbsp;&nbsp;
-          <button id="forward" href="#"> Step forward >|</button>
-      </div>
+      <img class="card gif-card gifplayer" id="adver-card" data-mode="gif"/>
+      <!--
+        <script>
+            $(document).ready( function(){
+              $('.gifplayer').gifplayer();
+            });
+          </script>
+        -->
     </div>
 
     <div class="col s4 offset-s8 dt-container" style="height:65%">

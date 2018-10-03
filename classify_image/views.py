@@ -98,10 +98,15 @@ def classify_api(request):
 			print('adversarial example is classified by', result[0][1])
 
 			# Print image to web site
-			with open(os.path.join(current_dir,'imagenet/output/testtest.png'), 'rb') as img_file:
+			with open(os.path.join(current_dir,'imagenet/output/testtest.gif'), 'rb') as img_file:
 				img_str = base64.b64encode(img_file.read())
 			tmp_adver.write(base64.b64decode(img_str))
 			tmp_adver.close()
+
+			with open(os.path.join(current_dir,'imagenet/output/testtest.gif'), 'rb') as gif_file:
+				gif_str = base64.b64encode(gif_file.read())
+			tmp_adver_gif.write(base64.b64decode(gif_str))
+			tmp_adver_gif.close()
 
 		elif model == 'mnist':
 			tmp_adver = NamedTemporaryFile()
@@ -125,7 +130,7 @@ def classify_api(request):
 			tmp_adver.write(base64.b64decode(img_str))
 			tmp_adver.close()
 
-			with open(os.path.join(current_dir,'mnist/output/testgif.gif'), 'rb') as gif_file:
+			with open(os.path.join(current_dir,'mnist/output/testtest.gif'), 'rb') as gif_file:
 				gif_str = base64.b64encode(gif_file.read())
 			tmp_adver_gif.write(base64.b64decode(gif_str))
 			tmp_adver_gif.close()
@@ -140,7 +145,7 @@ def classify_api(request):
 			for i in range(len(classify_result)) :
 				data["confidence"][classify_result[i][1]] = float(classify_result[i][2])
 			data["adverimage"] = 'data:image/png;base64,' + img_str.decode('utf-8')
-			#data["adverimage_gif"] = 'data:image/gif;base64,' + gif_str.decode('utf-8')
+			data["adverimage_gif"] = 'data:image/gif;base64,' + gif_str.decode('utf-8')
 			data["adversarial"] = {}
 			for i in range(len(result)) :
 				data["adversarial"][result[i][1]] = float(result[i][2])

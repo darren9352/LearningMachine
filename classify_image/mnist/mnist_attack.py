@@ -27,7 +27,7 @@ from classify_image.mnist.mnist_handle import get_mnist_idx
 
 abs_path = os.path.dirname(__file__)
 SAVE_PATH = os.path.join(abs_path, 'output/testtest.png')
-SAVE_GIF_PATH = os.path.join(abs_path, 'output/testgif.gif')
+SAVE_GIF_PATH = os.path.join(abs_path, 'output/testtest.gif')
 INPUT_PATH = os.path.join(abs_path, 'dataset/images/testtest.png')
 
 # MNIST-specific dimensions

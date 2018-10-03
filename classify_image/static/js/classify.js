@@ -42,6 +42,10 @@ $(document).ready(function() {
   $('#go-back, #go-start').click(function() {
     $('#img-card').removeAttr("src");
     $('#mnist-img-card').removeAttr("src");
+    $('#adver-card').removeAttr("src");
+    $('#adver-card').removeAttr("data-gif");
+    $('#adver-card').removeAttr("width");
+    $('#adver-card').removeAttr("height");
     $('#stat-table').html('');
     switchAdver(0);
     switchCard(0);
@@ -156,10 +160,18 @@ loadStats = function(jsonData) {
   var adverData = [{x:[], y:[], type:'bar', text: [], textposition: 'auto'}];
 
   if (data["success"] == true) {
-    $('#adver-card').attr('src', data["adverimage"])
-    $('#adver-card').attr('rel:animated_src', data["adverimage_gif"])
-    $('#adver-card').attr('width', 360)
-    $('#adver-card').attr('height', 360)
+    /*
+    $('#adver-card').attr('src', data["adverimage"]);
+    $('#adver-card').attr('data-gif', data["adverimage_gif"]);
+
+    $('#adver-card').attr('object-fit', 'cover');
+    $('#adver-card').attr('object-position', 'centor');
+    $('#adver-card').attr('width', 'inherit');
+    $('#adver-card').attr('height', '100%');
+    */
+   
+    $('#adver-card').attr('src', data["adverimage_gif"]);
+
     if (data["model"] == 'mnist') {
       $('#mnist-img-card').attr('src', data["input_image"]);
       switchInput(1);
@@ -191,54 +203,6 @@ loadStats = function(jsonData) {
         adverData[0].y.push(percent);
 		    adverData[0].text.push(percent);
     }
-	
-	var gif = new SuperGif({
-		gif: document.getElementById('adver-card'),
-		loop_mode: 'auto',
-    auto_play: true
-		//draw_while_loading: false,
-		//show_progress_bar: true,
-		//progressbar_height: 10,
-		//progressbar_foreground_color: 'rgba(0, 255, 4, 0.1)',
-		//progressbar_background_color: 'rgba(255,255,255,0.8)'
-	});
-
-/*
-	gif.load(function(){
-	  document.getElementById("controller-bar").style.visibility = 'visible';
-	  loaded = true;
-	  console.log('loaded');
-	});
-*/
-	
-	$('button#backward').click(function(){
-	  console.log('current: ', gif.get_current_frame());
-	  var total_frames = gif.get_length();
-	  gif.pause();
-	  if(gif.get_current_frame() == 0) {
-		gif.move_to(total_frames-1);
-	  } else {
-		gif.move_relative(-1);
-	  }
-	  console.log('next: ', gif.get_current_frame());
-	})
-
-
-	$('button#play').click(function(){
-	  console.log('iam play');
-	  if(gif.get_playing()){
-		gif.pause();
-	  } else {
-		gif.play();
-	  }
-	})
-
-	$('button#forward').click(function(){
-	  console.log('current: ', gif.get_current_frame());
-	  gif.pause();
-	  gif.move_relative(1);
-	  console.log('next: ', gif.get_current_frame());
-	})
 
 	origin_layout = {
 		title: 'Original',

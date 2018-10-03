@@ -34,7 +34,7 @@ body {
   z-index: 2;
 }
 
-.dd-card, .uf-card, .dt-card, .ad-temp-card, .mnist-dd-card, .mnist-uf-card, .result-card {
+.dd-card, .uf-card, .dt-card, .ad-temp-card, .mnist-dd-card, .mnist-uf-card, .result-card, .gif-card {
   height: inherit;
 }
 
@@ -107,6 +107,12 @@ body {
 }
 
 #img-card {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+#adver-card {
   max-width: 100%;
   max-height: 100%;
   display: block;

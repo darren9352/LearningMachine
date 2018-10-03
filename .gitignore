@@ -1,4 +1,6 @@
 .idea
 *.pyc
+*.png
+*.gif
 *.sqlite3
 staticfiles/
