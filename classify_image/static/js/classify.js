@@ -39,7 +39,17 @@ $(document).ready(function() {
     }
   });
 
+  var state = 0;
+  function change_image() {
+    if(state==0) {
+      $('#adver-card').attr('src', data["adverimage"]);
+    }
+
+  }
+
   $('#go-back, #go-start').click(function() {
+    adver_gif_src = '';
+    adver_src = '';
     $('#img-card').removeAttr("src");
     $('#mnist-img-card').removeAttr("src");
     $('#adver-card').removeAttr("src");
@@ -146,6 +156,20 @@ loadImage = function(file) {
   switchCard(1);
 }
 
+var adver_src = '';
+var adver_gif_src = '';
+var state = 1;
+function change_image() {
+  console.log("change Event!");
+  if(state==0) {
+    $('#adver-card').attr('src',adver_src);
+    state=1;
+  }
+  else {
+    $('#adver-card').attr('src', adver_gif_src);
+    state=0;
+  }
+}
 loadStats = function(jsonData) {
   showStat();
   $('.uf-button').animate({
@@ -162,12 +186,14 @@ loadStats = function(jsonData) {
   if (data["success"] == true) {
     
     $('#adver-card').attr('src', data["adverimage"]);
-    $('#adver-card').attr('data-gif', data["adverimage_gif"]);
+    adver_gif_src = data["adverimage_gif"]
+    adver_src = data["adverimage"]
+    //$('#adver-card').attr('data-gif', data["adverimage_gif"]);
 
-    $('#adver-card').attr('object-fit', 'cover');
-    $('#adver-card').attr('object-position', 'centor');
-    $('#adver-card').attr('width', 'inherit');
-    $('#adver-card').attr('height', '100%');
+    //$('#adver-card').attr('object-fit', 'cover');
+    //$('#adver-card').attr('object-position', 'centor');
+    //$('#adver-card').attr('width', 'inherit');
+    //$('#adver-card').attr('height', '100%');
     
    
     //$('#adver-card').attr('src', data["adverimage_gif"]);
@@ -204,13 +230,13 @@ loadStats = function(jsonData) {
 		    adverData[0].text.push(percent);
     }
 
-	origin_layout = {
-		title: 'Original',
-	};
+    origin_layout = {
+      title: 'Original',
+    };
 
-	adver_layout = {
-		title: 'Adversarial',
-	};
+    adver_layout = {
+      title: 'Adversarial',
+    };
 
     Plotly.newPlot('stat-table', chartData, origin_layout);
     Plotly.newPlot('adver-table', adverData, adver_layout);

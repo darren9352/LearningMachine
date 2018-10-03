@@ -173,7 +173,7 @@
 			var gifWidth = this.previewElement.width();
 			var gifHeight = this.previewElement.height();
 
-			this.gifElement=$("<img class='card gp-gif-element' width='"+ gifWidth + "' height=' "+ gifHeight +" '/>");
+			this.gifElement=$("<img class='card gp-gif-element' id='gif' width='"+ gifWidth + "' height=' "+ gifHeight +" '/>");
 
 			var wait = this.getOption('wait');
 			if(wait){
