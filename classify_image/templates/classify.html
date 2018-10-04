@@ -4,12 +4,14 @@
 <head>
   <title>Image Classification</title>
   <link rel="stylesheet" href="{% static 'css/classify.css' %}" type="text/css" />
+  <link rel="stylesheet" href="{% static 'css/gifplayer.css' %}" type="text/css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.1/css/materialize.min.css" />
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.1/js/materialize.min.js"></script>
+  <script src="{% static 'js/jquery.gifplayer.js' %}"></script>
   <script src="{% static 'js/classify.js' %}"></script>
 </head>
 
@@ -19,6 +21,8 @@
       function selectModel(num) {
         if(num == '0'){
           document.getElementById('div_algorithm').style.display = "block";
+          document.getElementById('iterate').style.visibility = "visible";
+          document.getElementById('iter_label').style.visibility = "visible";
           var elements = document.getElementsByClassName('div_model');
           for(var i = 0, length = elements.length; i < length; i++) {
             elements[i].style.display = 'none';
@@ -39,6 +43,8 @@
           }).css("z-index", 0);
         } else {
           document.getElementById('div_algorithm').style.display = "none";
+          document.getElementById('iterate').style.visibility = "hidden";
+          document.getElementById('iter_label').style.visibility = "hidden";
           var elements = document.getElementsByClassName('div_model');
           for(var i = 0, length = elements.length; i < length; i++) {
             elements[i].style.display = 'block';
@@ -60,10 +66,12 @@
         }
       }
     </script>
+
     <div class="col s2" style="position:absolute;">
       <input type="radio" id="imagenet" name="selected_model" value="imagenet" onclick="selectModel('0');"checked/> <label for="imagenet">Inception V3</label>
       <input type="radio" id="mnist" name="selected_model" value="mnist" onclick="selectModel('1');" /> <label for="mnist">MNIST Model</label>
     </div>
+
     <div class="input-field col s6 offset-s2" id="div_algorithm" style="position:absolute;margin-top:1px;">
       <select style="display:inline;" id="attack_algorithm">
         <option value="" disabled selected>Choose your Attack Algorithm</option>
@@ -72,6 +80,7 @@
         <option value="cwl2">CWL2</option>
       </select>
     </div>
+
     <div class="input-field col s1 offset-s2 div_model" style="position:absolute;margin-top:1px;display:none;">
       <select style="display:inline;" id="mnist_number">
         <option value="" disabled selected>Sample</option>
@@ -87,6 +96,7 @@
         <option value="9">9</option>
       </select>
     </div>
+
     <div class="input-field col s1 offset-s3 div_model" style="position:absolute;margin-top:1px;display:none;">
       <select style="display:inline;" id="target_number">
         <option value="" disabled selected>Target</option>
@@ -102,22 +112,25 @@
         <option value="9">9</option>
       </select>
     </div>
+
     <div class="input-field col s4 offset-s4 div_model" style="position:absolute;margin-top:1px;display:none;">
       <select style="display:inline;" id="mnist_attack_algorithm">
         <option value="" disabled selected>Choose your Attack Algorithm</option>
         <option value="fgsm">FGSM</option>
         <option value="jsma">JSMA</option>
         <option value="cwl2">CWL2</option>
-		<option value="deepfool">DeepFool</option>
+		    <option value="deepfool">DeepFool</option>
       </select>
     </div>
+
     <div class="col s4 offset-s8">
-      <label for="iterate">Iterate</label>
-    <p class="range-field" style="display:inline;">
-      <input type="range" id="iterate" min="1" max="30" />
-    </p>
+      <label for="iterate" id="iter_label">Iterate</label>
+      <p class="range-field" style="display:inline;">
+        <input type="range" id="iterate" min="1" max="30" /></p>
+    </div>
+
   </div>
-  </div>
+
   <div class="container row main-container" style="width:100%; max-width:100%; max-height: 100%;">
     <div class="col s4 dd-container">
       <div class="card dd-card">
@@ -135,11 +148,13 @@
         </div>
       </div>
     </div>
+
     <div class="col s4 uf-container">
       <div class="card uf-card">
         <img class="card crop" id="img-card" />
       </div>
     </div>
+
     <div class="col s4 mnist-dd-container">
       <div class="card mnist-dd-card">
         <div class="card-content black-text file-field">
@@ -150,9 +165,11 @@
         </div>
       </div>
     </div>
+
     <div class="col s4 mnist-uf-container mnist-pure-container">
       <img class="card crop" id="mnist-img-card" />
     </div>
+
     <div class="col s4 offset-s4 ad-temp-container">
       <div class="card ad-temp-card">
         <div class="card-content black-text file-field">
@@ -163,9 +180,11 @@
         </div>
       </div>
     </div>
+
     <div class="col s4 offset-s4 ad-container">
-      <img class="card crop" id="adver-card"/>
+      <img class="card crop" id="adver-card" onclick="change_image()"/>   
     </div>
+
     <div class="col s4 offset-s8 dt-container" style="height:65%">
       <div class="card dt-card" id="stat-table">
       </div>
@@ -180,6 +199,7 @@
         </div>
       </div>
     </div>
+
     <div id="modal1" class="modal">
       <div class="modal-content">
         <div style="width: 100%; overflow: hidden;">
@@ -204,9 +224,10 @@
       </div>
     </div>
   </div>
+
   <div class="container col s8 uf-container uf-button" style="position:relative">
     <div class="waves-effect waves-light btn" id="upload-button">
-      <span>Upload and Detect Image</span>
+      <span>Upload and Attack Image</span>
     </div>
     <div class="waves-effect waves-light btn" id="go-back">
       <span>Go Back</span>
@@ -214,7 +235,7 @@
   </div>
   <div class="container col s8 mnist-uf-container mnist-uf-button" style="position:relative; z-index:0;">
     <div class="waves-effect waves-light btn" id="mnist-upload-button">
-      <span>MNIST Upload</span>
+      <span>MNIST Upload and Attack Image </span>
     </div>
     <div class="waves-effect waves-light btn" id="mnist-go-back">
       <span>Go Back</span>
@@ -225,6 +246,7 @@
       <span>Go Back</span>
     </div>
   </div>
+
 </body>
 
 </html>
